@@ -1,0 +1,41 @@
+{
+    "encoding_parameters": {
+        "height": 1920,
+        "width": 1080,
+        "aspect_ratio": [16, 9],
+        "cropping": "center",
+        "container": "mp4",
+        "video_bitrate": 1000000,
+        "audio_tracks": 0
+    },
+    "clip_parameters": {
+        "clip_transitions": false,
+        "clip_graphic_template": {
+            "graphic_template": "yellow"
+        }
+    },
+    "destinations": {
+        "path": "1clip.mp4"
+    },
+    "clips": [
+        {
+            "video_url": "https://demo-api.forzify.com/nld/playlist.m3u8/15:1861000:1871000/Manifest.m3u8",
+            "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+            "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
+            "game_date": "2023-05-13",
+            "game_round": "3",
+            "home_team_goals": "3",
+            "visiting_team_goals": "4",
+            "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
+            "clip_meta": [
+                {
+                    "player_name": "Mikael Mikaelson",
+                    "team_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+                    "action": null,
+                    "score": "0-0",
+                    "phase": "1st half"
+                }
+            ]
+        }
+    ]
+}

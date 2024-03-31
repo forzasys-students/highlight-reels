@@ -1,0 +1,34 @@
+{
+    "red_template": {
+        "fg_color": "rød i hex",
+        "bg_color": "noe rød i hex",
+        "text_color": "noe hvit i hex",
+        "template": {
+            "name": "Red"
+        }
+    },
+    "orange_template": {
+        "fg_color": "oransj i hex",
+        "bg_color": "noe oransj i hex",
+        "text_color": "noe hvit i hex",
+        "template": {
+            "name": "Orange"
+        }
+    },
+    "yellow_template": {
+        "fg_color": "yellow i hex",
+        "bg_color": "noe yellow i hex",
+        "text_color": "noe hvit i hex",
+        "template": {
+            "name": "Yellow"
+        }
+    },
+    "custom_template": {
+        "fg_color": "custom i hex",
+        "bg_color": "noe custom i hex",
+        "text_color": "noe custom i hex",
+        "template": {
+            "name": "Personalized"
+        }
+    }
+}
