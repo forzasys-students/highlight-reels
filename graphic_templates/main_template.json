@@ -1,7 +1,8 @@
 {
     "red_template": {
-        "fg_color": "rød i hex",
-        "bg_color": "noe rød i hex",
+        "fg_color": "red i hex",
+        "bg_color": "noe red i hex",
+        "border_color": "noe border color i hex",
         "text_color": "noe hvit i hex",
         "template": {
             "name": "Red"
@@ -10,6 +11,7 @@
     "orange_template": {
         "fg_color": "oransj i hex",
         "bg_color": "noe oransj i hex",
+        "border_color": "noe border color i hex",
         "text_color": "noe hvit i hex",
         "template": {
             "name": "Orange"
@@ -18,14 +20,16 @@
     "yellow_template": {
         "fg_color": "yellow i hex",
         "bg_color": "noe yellow i hex",
+        "border_color": "noe border color i hex",
         "text_color": "noe hvit i hex",
         "template": {
             "name": "Yellow"
         }
     },
     "custom_template": {
-        "fg_color": "custom i hex",
-        "bg_color": "noe custom i hex",
+        "fg_color": "#C4D7F2",
+        "bg_color": "#F0F7EE",
+        "border_color": "noe border color i hex",
         "text_color": "noe custom i hex",
         "template": {
             "name": "Personalized"

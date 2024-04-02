@@ -2,7 +2,10 @@
     "encoding_parameters": {
         "height": 1920,
         "width": 1080,
-        "aspect_ratio": [16, 9],
+        "aspect_ratio": [
+            16,
+            9
+        ],
         "cropping": "center",
         "container": "mp4",
         "video_bitrate": 1000000,
@@ -11,7 +14,7 @@
     "clip_parameters": {
         "clip_transitions": false,
         "clip_graphic_template": {
-            "graphic_template": "yellow"
+            "graphic_template": "yellow_template"
         }
     },
     "destinations": {
@@ -31,7 +34,7 @@
                 {
                     "player_name": "Mikael Mikaelson",
                     "team_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
-                    "action": null,
+                    "action": "shot",
                     "score": "0-0",
                     "phase": "1st half"
                 }
