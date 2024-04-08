@@ -5,7 +5,7 @@
         "border_color": "noe border color i hex",
         "text_color": "noe hvit i hex",
         "template": {
-            "name": "Red"
+            "name": "ForzaSys"
         }
     },
     "orange_template": {
@@ -14,7 +14,7 @@
         "border_color": "noe border color i hex",
         "text_color": "noe hvit i hex",
         "template": {
-            "name": "Orange"
+            "name": "ForzaSys"
         }
     },
     "yellow_template": {
@@ -23,7 +23,7 @@
         "border_color": "noe border color i hex",
         "text_color": "noe hvit i hex",
         "template": {
-            "name": "Yellow"
+            "name": "ForzaSys"
         }
     },
     "custom_template": {
@@ -32,7 +32,7 @@
         "border_color": "noe border color i hex",
         "text_color": "noe custom i hex",
         "template": {
-            "name": "Personalized"
+            "name": "ForzaSys"
         }
     }
 }
