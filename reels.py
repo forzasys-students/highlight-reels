@@ -4,6 +4,8 @@ import re
 import requests
 import subprocess
 
+from typing import Dict, List
+
 from graphics import GraphicsTemplate
 
 current_path_config = None
@@ -16,7 +18,7 @@ class Clip:
         self.config = config
         self.encoding_params = config.get('encoding_params', {})
         self.aspect_ratio = self.encoding_params.get('aspect_ratio', None)
-        self.cropping = self.encoding_params.get('cropping',None)
+        self.platform = self.encoding_params.get('platform',None)
         self.bitrate = self.encoding_params.get('video_bitrate', None)
         self.audio_bitrate = self.encoding_params.get('audio_bitrate', None)
         self.audio_tracks = self.encoding_params.get('audio_tracks', None)
@@ -55,7 +57,7 @@ class Clip:
         graphics = None
 
         if template_name == 'ForzaSys':
-            graphics = FSGraphicsTemplate()
+            graphics = GraphicsTemplate()
             #log.info('Template ForzaSys applied')
         else:
             #log.warning(f'No template for {template_name} was found. Graphics will be disabled.')
@@ -224,6 +226,8 @@ def modify_config(config_file, type, value, index=0):
         data['clip_parameters']['clip_graphic_template'][type] = value
     elif(type == 'action'):
         data['clips'][index]['clip_meta'][0][type] = value
+    elif(type == 'platform' or type == 'aspect_ratio'):
+        data['encoding_parameters'][type] = value
 
     with open(json_file_path, 'w') as file:
         json.dump(data, file, indent=4)
@@ -298,26 +302,47 @@ def user_options():
             print(f"Error resolving input '{choice}'")
 
     while True:
+        ptemp = 'platform'
+        atemp = 'aspect_ratio'
+        print("Choose a platform for encoding (default: youtube): \n1. Youtube (16:9)\n2. Tiktok (9:16)\n3. Instagram (1:1)\n4. Facebook (1:1)")
+        coice = input("Enter your choice (1/2/3/4): ")
+
+        if choice == '1' or choice == 'youtube':
+            modify_config(config, ptemp, 'youtube')
+            modify_config(config, atemp, [16, 9])
+        elif choice == '2' or choice == 'tiktok':
+            modify_config(config, ptemp, 'tiktok')
+            modify_config(config, atemp, [9, 16])
+        elif choice == '3' or choice == 'instagram':
+            modify_config(config, ptemp, 'instagram')
+            modify_config(config, atemp, [1, 1])
+        elif choice == '4' or choice == 'facebook':
+            modify_config(config, ptemp, 'facebook')
+            modify_config(config, atemp, [1, 1])
+        else:
+            print(f"Error resolving input '{choice}'")
+            continue
+        break
+
+    while True:
         gtemp = 'graphic_template'
         print("Choose a color template (default: yellow): \n1. Red\n2. Orange\n3. Yellow\n4. Custom")
         choice = input("Enter your choice (1/2/3/4): ")
 
         if choice == '1' or choice == 'red':
             modify_config(config, gtemp, 'red_template')
-            break
         elif choice == '2' or choice == 'orange':
             modify_config(config, gtemp, 'orange_template')
-            break
         elif choice == '3' or choice == 'yellow':
             modify_config(config, gtemp, 'yellow_template')
-            break
         elif choice == '4' or choice == 'custom':
             user_custom()
             modify_config(config, gtemp, 'custom_template')
-            break
         else:
             print(f"Error resolving input '{choice}' ")
-
+            continue
+        break
+    return
 def log_initial_params(config, encoding_params, clip_params):
     # log.info(
     #     f'Parameters are as below:\n'
@@ -338,7 +363,6 @@ def report_exit(msg, success=False):
 def open_config():
     if current_path_config is None:
         report_exit("Config not found or specified")
-
     try:
         with open(current_path_config, 'r') as f:
             return json.loads(f.read())
@@ -352,14 +376,15 @@ def get_graphic(graphic_template, config):
     try:
         with open(path_graphic('main_template.json'), 'r') as f:
             graphic_data = json.load(f)
-            return graphic_data.get('graphic_template')
+            return graphic_data.get(graphic_template)
     except Exception as e:
         # log.error(f'An error occured while loading graphic: {e}')
         return None
 
 def initialize_clip(clip_config, clip_params, encoding_params, config, i, graphic_data):
     clip_config['graphic_template'] = clip_params.get('clip_graphic_template', {}).get('graphic_template', None)
-    clip_config['enconding_params'] = encoding_params
+    clip_config['name'] = config['name']
+    clip_config['encoding_params'] = encoding_params
     return Clip(clip_config, f'video/{i}.mp4', graphic_data)
 
 def process_clips(config, clip_params, encoding_params):
@@ -368,35 +393,48 @@ def process_clips(config, clip_params, encoding_params):
     video_h = None
     video_w = None
     fps = None
+    platform = None
     clips = []
-
+    
     graphic_template = clip_params.get('clip_graphic_template', {}).get('graphic_template', None)
+    
     graphic_data = get_graphic(graphic_template, config)
-
+    
     for i, clip_config in enumerate(config['clips']):
         # tpc = time.perf_counter()
-
+        
         clip = initialize_clip(clip_config, clip_params, encoding_params, config, i, graphic_data)
         if clip.graphic:
+            print(clip.graphic)
             #if clip intro and outro
                 #is_compilation = true
-            clip.graphic.download_and_meta
+            clip.graphic.download_and_meta(video_h, video_w, fps, is_compilation, platform)
+            #if i == 0 and clip.graphic.intro_screen:
+                #add_intro(clip, clip_config, video_h, video_w, fps, platform, clips, graphic_data)
+            clips.append(clip)
+            #log.info(f'Added video with meta graphics {i + 1}/{total_clips} with duration {clip.file_duration():.2f} seconds in {time.perf_counter()-tpc:.2f}')
+
+            #if i == (total_clips - 1) and clip.graphic.outro_screen:
+                #is_compulation = True
+                #add_outro(clip, clip_config, video_h, video_w, fps, platform, clips, graphic_data)
+    
+    return video_h, video_w, fps, platform, clips, is_compilation
 
 def main():
     try:
         user_options()
         config = open_config()
-
         encoding_params = config.get('encoding_parameters', {})
         clip_params = config.get('clip_parameters', {})
-
-        log_initial_params(config, encoding_params, clip_params)
-
-        video_h, video_w, fps, clips, is_comp = process_clips(config, encoding_params, clip_params)
+        
+        #log_initial_params(config, encoding_params, clip_params)
+        video_h, video_w, fps, clips, is_comp = process_clips(config, clip_params, encoding_params)
+        
     except Exception as e:
         # log.error(f'An error has occured: {e}')
         pass
     finally:
+        pass
 
 
 if __name__ == '__main__':

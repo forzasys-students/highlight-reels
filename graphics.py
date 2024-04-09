@@ -26,7 +26,7 @@ class GraphicsTemplate:
         except Exception:
             return False
         
-    def download_and_meta(self, video_w, video_h, fps, is_compilation):
+    def download_and_meta(self, video_w, video_h, fps, is_compilation, platform):
         #tpc = time.perf_counter()
 
         audio_codec_part, video_codec_part = self.clip.download(is_compilation)
@@ -79,6 +79,8 @@ def create_animated_meta(video_h, video_w, clip_meta, fg_color, bg_color, border
         team_logo_url = meta['team_logo_url']
 
         icon, msg = get_action_message_and_icon(meta, language='EN')
+    
+    
 
 def get_action_message_and_icon(meta, language='EN'):
     team_logo_url = meta['team_logo_url']

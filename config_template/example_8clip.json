@@ -1,4 +1,5 @@
 {
+    "name": "allsvenskan",
     "encoding_parameters": {
         "height": 1920,
         "width": 1080,
@@ -6,7 +7,7 @@
             16,
             9
         ],
-        "cropping": "center",
+        "platform": "tiktok",
         "container": "mp4",
         "video_bitrate": 1000000,
         "audio_tracks": 0
