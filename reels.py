@@ -405,7 +405,6 @@ def process_clips(config, clip_params, encoding_params):
         
         clip = initialize_clip(clip_config, clip_params, encoding_params, config, i, graphic_data)
         if clip.graphic:
-            print(clip.graphic)
             #if clip intro and outro
                 #is_compilation = true
             clip.graphic.download_and_meta(video_h, video_w, fps, is_compilation, platform)
