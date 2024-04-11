@@ -142,7 +142,12 @@ def create_animated_meta(video_h, video_w, clip_meta, fg_color, bg_color, border
         fps = int(cap.get(cv2.CAP_PROP_FPS))
 
         # Initialize video writer
-        
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        output_filename = local_file_name.replace('.mp4', '_meta.mp4')
+        out = cv2.VideoWriter(output_filename, fourcc, fps, (width, height))
+
+        duration = 8 * fps
+        min_x
     
     
 
