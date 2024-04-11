@@ -27,10 +27,10 @@
         }
     },
     "custom_template": {
-        "fg_color": "#C4D7F2",
-        "bg_color": "#F0F7EE",
-        "border_color": "noe border color i hex",
-        "text_color": "noe custom i hex",
+        "fg_color": "#ffb703",
+        "bg_color": "#023047",
+        "border_color": "#219ebc",
+        "text_color": "#FFFFFF",
         "template": {
             "name": "ForzaSys"
         }

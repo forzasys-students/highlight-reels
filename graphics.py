@@ -1,6 +1,9 @@
 import requests
-from PIL import Image, ImageDraw, ImageFont
 import os
+import cv2
+import time
+import logging
+from PIL import Image, ImageDraw, ImageFont
 from urllib.parse import urlparse
 
 included_events = ['goal', 'shot', 'yellow card', 'red card', 'penalty']
@@ -76,9 +79,70 @@ def get_img_local(image_name):
 
 def create_animated_meta(video_h, video_w, clip_meta, fg_color, bg_color, border_color, text_color, local_file_name, aspect_ratio=[16, 9], fps=25.0):
     for i, meta in enumerate(clip_meta):
-        team_logo_url = meta['team_logo_url']
+        home_logo_url = meta['homo_logo_url']
+        visiting_logo_url = meta['visiting_logo_url']
+        league_logo_url = meta['league_logo_url']
 
         icon, msg = get_action_message_and_icon(meta, language='EN')
+
+        # Dynamic sizes
+        if aspect_ratio == [16, 9] or aspect_ratio is None:
+            aspect_ratio = [16, 9]
+            logo_box_dim_ratio = 0.35
+            logo_dim_ratio = 0.2
+            msg_font_size = 25
+            icon_dim_ratio = 0.15
+            overlay_postion_y_offset = 0.92
+            overlay_postion_x_offset = 0.05
+        elif aspect_ratio == [9, 16]:
+            logo_box_dim_ratio = 0.15
+            logo_dim_ratio = 0.14
+            msg_font_size = 18
+            icon_dim_ratio = 0.1
+            overlay_postion_y_offset = 0.92
+            overlay_postion_x_offset = 0.1
+        elif aspect_ratio == [1, 1]:
+            logo_box_dim_ratio = 0.22
+            logo_dim_ratio = 0.16
+            msg_font_size = 23
+            icon_dim_ratio = 0.11
+            overlay_postion_y_offset = 0.92
+            overlay_postion_x_offset = 0.1
+        elif aspect_ratio == [4, 5]:
+            logo_box_dim_ratio = 0.22
+            league_logo_dim_ratio = 0.16
+            msg_font_size = 23
+            icon_dim_ratio = 0.11
+            overlay_postion_y_offset = 0.92
+            overlay_postion_x_offset = 0.1
+        else:
+            raise ValueError(f'Invalid aspect ratio entered: {aspect_ratio}.')
+        
+        # Initialize dimensions for logos
+        logo_box_dim = round(logo_box_dim_ratio * video_h * 0.66)
+        logo_dim = round(logo_dim_ratio * video_h * 0.3)
+        league_logo_dim = round(league_logo_dim_ratio * video_h * 0.66)
+        
+        # Initialize font-size and font-type
+        font_path = os.path.join('resources', 'font', 'Montserrat-VariableFont_wght')
+        msg_font = ImageFont.truetype('font_path', msg_font_size)
+
+        # Download logos
+        home_logo = get_img(home_logo_url)
+        home_logo.thumbnail((logo_dim, logo_dim))
+        visiting_logo = get_img(visiting_logo_url)
+        visiting_logo.thumnail((logo_dim, logo_dim))
+        league_logo = get_img(league_logo_url)
+        league_logo.thumbail((league_logo_dim, league_logo_dim))
+
+        # Initialize video capture 
+        cap = cv2.VideoCapture(local_file_name)
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+
+        # Initialize video writer
+        
     
     
 
