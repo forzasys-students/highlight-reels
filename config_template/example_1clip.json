@@ -19,7 +19,9 @@
         }
     },
     "destinations": {
-        "path": "1clip.mp4"
+        "type": "local",
+        "path": "1clip.mp4",
+        "video_export_id": "7e49b8960142"
     },
     "clips": [
         {
