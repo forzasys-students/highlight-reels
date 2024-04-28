@@ -5,7 +5,7 @@ import requests
 import subprocess
 import time
 import m3u8
-
+import io
 from typing import Dict, List
 from utils import run_and_log
 from graphics import GraphicsTemplate
@@ -203,126 +203,130 @@ class Clip:
         
         return audio_codec_part, video_codec_part
 
-def download_ts_files(video_url: str, local_filename: str, audio_track=None):
-    # Download audio streams
-    temp_video = None
-    try:
-        response = session.get(video_url, timeout=2)
-        response.raise_for_status()
+def get_response(url: str, timeout: int = 2, retries: int = 2) -> requests.Response:
+    headers = {'X-Forzify-Client': 'telenor-internal'}# if IN_CLOUD else {}
+    for attempt in range(retries):
+        try:
+            response = session.get(url, headers=headers, timeout=timeout)
+            response.raise_for_status()
+            return response
+        except requests.RequestException as e:
+            if attempt >= retries - 1:
+                #log.error(f'Error fetching {url} after {retries} attempts: {e}')
+                print(f'Error fetching {url} after {retries} attempts: {e}')
+                raise
+            time.sleep(0.2)
 
-        master_manifest = m3u8.loads(response.text)
-        master_manifest.base_uri = video_url
+
+def download_segments(manifest, filename, retries=2, backoff_factor=0.5):
+    '''Download video or audio segments.'''
+    headers = {'X-Forzify-Client': 'telenor-internal'}# if IN_CLOUD else {}
+    for line in manifest.splitlines():
+        if line.startswith('#'):
+            continue
+        for attempt in range(retries):
+            try:
+                with session.get(line, headers=headers, stream=True) as req:
+                    req.raise_for_status()
+                    # Create a new in-memory buffer for this segment
+                    with io.BytesIO() as segment_buffer:
+                        for chunk in req.iter_content(chunk_size=8192):
+                            segment_buffer.write(chunk)
+
+                        # Append after successfully downloading the segment
+                        with open(filename, 'ab') as f:
+                            segment_buffer.seek(0)
+                            f.write(segment_buffer.read())
+
+                        break
+            except Exception as e:
+                #log.info(f'Attempt {attempt+1} for downloading the segment failed: {e}')
+                print(f'Attempt {attempt+1} for downloading the segment failed: {e}')
+                time.sleep(attempt * backoff_factor)
+        else:
+            #log.error(f'Failed to download {line} after {retries} attempts')
+            print(f'Failed to download {line} after {retries} attempts')
+
+
+def process_default_audio_tracks(manifest, local_filename):
+    '''Search in the manifest and download all available tracks'''
+    audio_files_count = 0
+    command_append_audio = ['ffmpeg', '-y', '-hide_banner', '-loglevel', 'warning', '-i', local_filename]
+    temp_video = local_filename.replace('.ts', '_temp.ts')
+
+    for media in manifest.media:
+        if media.type == 'AUDIO':
+            audio_files_count += 1
+            # Download the audio segments
+            audio_file = local_filename.replace('.ts', f'_{media.name}.ts')
+            #log.info(f'Downloading audio segments from {media.absolute_uri}')
+            segment_manifest = get_response(media.absolute_uri).text
+            download_segments(segment_manifest, audio_file)
+            command_append_audio.extend(['-i', audio_file])
+
+    if audio_files_count > 0:
+        # -map 0:v -map 1:a -map 2:a -c:v copy -c:a aac
+        command_append_audio.extend(['-map', '0:v'])
+        for i in range(len(manifest.media)):
+            command_append_audio.extend(['-map', f'{i + 1}:a'])
+
+        command_append_audio.extend(['-c:v', 'copy', '-c:a', 'copy', temp_video])
+        run_and_log(command_append_audio, msg='Merging audio streams')
+        # Now move the temporary video file to the final filename
+        os.rename(temp_video, local_filename)
+
+    return audio_files_count
+
+
+def process_specific_audio_track(video_url, local_filename, audio_track):
+    '''Handle case with a specific audio track selected.'''
+    temp_video = local_filename.replace('.ts', '_temp.ts')
+    audio_url = video_url.replace('Manifest.m3u8', f'audio{audio_track}/Manifest.m3u8')
+    # Download audio segments
+    audio_filename = local_filename.replace('.ts', f'_audio{audio_track}')
+    audio_manifest = get_response(audio_url).text
+    download_segments(audio_manifest, audio_filename)
+
+    # Combine video and audio using ffmpeg for SHL videos
+    subprocess.run([
+        'ffmpeg',
+        '-y', '-hide_banner', '-loglevel', 'warning',
+        '-i', local_filename,
+        '-i', audio_filename,
+        '-c', 'copy',
+        temp_video
+    ])
+    # Now move the temporary video file to the final filename
+    os.rename(temp_video, local_filename)
+
+
+def download_ts_files(video_url: str, local_filename: str, audio_track=None):
+    # Select the highest quality stream and download it
+    try:
+        master_manifest = m3u8.loads(get_response(video_url).text)
+        master_manifest.base_uri = video_url.replace('/Manifest.m3u8', '')
 
         hq_manifest = max(master_manifest.playlists, key=lambda p: p.stream_info.bandwidth)
-        hq_manifest_uri = hq_manifest.absolute_uri.replace('/Manifest.m3u8', '')
 
-        response = session.get(hq_manifest_uri, timeout=2)
-        response.raise_for_status()
-        segment_manifest = response.text
+        # Get the manifest for the highest quality stream
+        segment_manifest = get_response(hq_manifest.absolute_uri).text
     except Exception as e:
-        #log.error('Could not download %s: %s' % (video_url, e.__str__()))
-        print(f'Could not download {video_url}: {e.__str__()}')
+        #log.error(f'Could not download from {video_url}. Error: {e}')
+        print(f'Could not download from {video_url}. Error: {e}')
         raise e
-    
+
     if segment_manifest is None:
-        #log.error('Segment manifest is empty?!')
-        raise Exception('Segment manifest is empty?!')
-
-    with open(local_filename, 'wb') as f:
-        for l in segment_manifest.splitlines():
-            if l.startswith('#'):
-                continue
-
-            with session.get(l, stream=True) as req:
-                req.raise_for_status()
-                for chunk in req.iter_content(chunk_size=8192):
-                    f.write(chunk)
+        #log.error(f'Segment manifest is empty for high-quality manifest URI: {hq_manifest.absolute_uri}')
+        print(f'Segment manifest is empty for high-quality manifest URI: {hq_manifest.absolute_uri}')
+        raise Exception(f'Segment manifest is empty for high-quality manifest URI: {hq_manifest.absolute_uri}')
+    download_segments(segment_manifest, local_filename)
 
     num_audio_streams = 0
     if audio_track is None:
-        num_audio_streams = len([i for i in master_manifest.media if i.type == 'AUDIO'])
-        command_append_audio = ['ffmpeg', '-y', '-hide_banner', '-loglevel', 'warning', '-i', local_filename]
-        audio_files_count = 0
-        for i in master_manifest.media:
-            temp_video = local_filename.replace('.ts', '_temp.ts')
-            if i.type == 'AUDIO':
-                # If a specific audio_track was set and it's not the current one, skip
-                str_audio_track = 'audio' + str(audio_track)
-                if audio_track is not None and str_audio_track != i.name:
-                    continue
-                audio_files_count += 1
-                # Get the URI for the audio stream
-                audio_uri = i.absolute_uri.replace('/Manifest.m3u8', '') + '/Manifest.m3u8'
-                # Determine a unique filename for each audio track
-                audio_file = local_filename.replace('.ts', f'_{i.name}.aac')
-
-                # Download the audio segments
-                
-                #log.info('Downloading audio segments from %s' % audio_uri)
-                
-                response = session.get(audio_uri, timeout=2)
-
-                response.raise_for_status()
-
-                segment_manifest = response.text
-
-                with open(audio_file, 'wb') as f:
-                    for l in segment_manifest.splitlines():
-                        if l.startswith('#'):
-                            continue
-
-                        with session.get(l, stream=True) as req:
-                            req.raise_for_status()
-                            for chunk in req.iter_content(chunk_size=8192):
-                                f.write(chunk)
-
-                command_append_audio.extend(['-i', audio_file])
-
-        if temp_video:
-            if audio_track is None:
-                # -map 0:v -map 1:a -map 2:a -c:v copy -c:a aac
-                command_append_audio.extend(['-map', '0'])
-                for i in range(len(master_manifest.media)):
-                    command_append_audio.extend(['-map', str(i + 1)])
-            else:
-                command_append_audio.extend(['-map', '0:v'])
-                command_append_audio.extend(['-map', '1:a'])
-
-            # FIXME: Double-check that it doesn't work to simply append the audio segments to the video segment
-            command_append_audio.extend(['-c:v', 'copy', '-c:a', 'copy', temp_video])  # Write to the temp_video file
-            run_and_log(command_append_audio, msg='Merging audio streams')
-            
-            # Now move the temporary video file to the final filename
-            os.rename(temp_video, local_filename)
+        num_audio_streams = process_default_audio_tracks(master_manifest, local_filename)
     else:
-        temp_video = local_filename.replace('.ts', '_temp.ts')
-        audio_url = video_url.replace('Manifest.m3u8', f'audio{audio_track}/Manifest.m3u8')
-        # Download audio segments
-        audio_response = session.get(audio_url)
-        audio_response.raise_for_status()
-        audio_manifest = audio_response.text
-
-        with open('audio.ts', 'wb') as audio_file:
-            for line in audio_manifest.splitlines():
-                if line.startswith('#'):
-                    continue
-                segment_url = line  # You might need to construct the full URL
-                with session.get(segment_url, stream=True) as segment_response:
-                    segment_response.raise_for_status()
-                    audio_file.write(segment_response.content)
-
-        # Combine video and audio using ffmpeg for SHL videos
-        subprocess.run([
-            'ffmpeg',
-            '-y', '-hide_banner', '-loglevel', 'warning',
-            '-i', local_filename,
-            '-i', 'audio.ts',
-            '-c', 'copy',
-            temp_video
-        ])
-        
-        # Now move the temporary video file to the final filename
-        os.rename(temp_video, local_filename)
+        process_specific_audio_track(video_url, local_filename, audio_track)
+        num_audio_streams = 1
 
     return num_audio_streams
 

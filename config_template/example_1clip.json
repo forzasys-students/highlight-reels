@@ -15,7 +15,7 @@
     "clip_parameters": {
         "clip_transitions": false,
         "clip_graphic_template": {
-            "graphic_template": "custom_template"
+            "graphic_template": "red_template"
         }
     },
     "destinations": {

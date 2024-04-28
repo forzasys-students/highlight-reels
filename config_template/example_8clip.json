@@ -7,7 +7,7 @@
             16,
             9
         ],
-        "platform": "tiktok",
+        "platform": "youtube",
         "container": "mp4",
         "video_bitrate": 1000000,
         "audio_tracks": 0
@@ -15,19 +15,17 @@
     "clip_parameters": {
         "clip_transitions": false,
         "clip_graphic_template": {
-            "graphic_template": "orange_template"
+            "graphic_template": "red_template"
         }
     },
     "destinations": {
         "type": "local",
         "path": "8clip.mp4",
         "video_export_id": "7e49b8960142"
-
     },
     "clips": [
         {
             "video_url": "https://demo-api.forzify.com/nld/playlist.m3u8/15:1861000:1871000/Manifest.m3u8",
-            
             "clip_meta": [
                 {
                     "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
@@ -38,7 +36,7 @@
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
                     "player_name": "Mikael Mikaelson",
-                    "action": "penalty",
+                    "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
                 }
@@ -56,7 +54,7 @@
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
                     "player_name": "Chris Christofferson",
-                    "action": "red card",
+                    "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
                 }
@@ -74,7 +72,7 @@
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
                     "player_name": "Adam Adamson",
-                    "action": "yellow card",
+                    "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
                 }
@@ -92,7 +90,7 @@
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
                     "player_name": "Lars Larson",
-                    "action": "shot",
+                    "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
                 }
@@ -128,7 +126,7 @@
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
                     "player_name": "Sam Samson",
-                    "action": "penalty",
+                    "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
                 }
@@ -146,7 +144,7 @@
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
                     "player_name": "Ibra Ibrahimovic",
-                    "action": "red card",
+                    "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
                 }
@@ -164,7 +162,7 @@
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
                     "player_name": "Ole Olenson",
-                    "action": "yellow card",
+                    "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
                 }
