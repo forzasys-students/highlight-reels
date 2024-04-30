@@ -140,6 +140,7 @@ class Clip:
             return
         
         tpc = time.perf_counter()
+        print(self.video_url)
         local_video_path = self.local_file_name.replace('.mp4', '.ts')
         self.num_audio_streams = download_ts_files(self.video_url, local_video_path, self.audio_tracks)
         tpc1 = time.perf_counter()

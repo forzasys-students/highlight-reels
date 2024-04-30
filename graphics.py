@@ -199,7 +199,7 @@ def create_animated_meta(video_h, video_w, clip_meta, fg_color, bg_color, border
         i = 1
         while cap.isOpened():
             ret, frame = cap.read()
-            if not red:
+            if not ret:
                 break
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             image = Image.fromarray(frame)
