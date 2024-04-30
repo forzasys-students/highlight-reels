@@ -29,7 +29,9 @@
             "clip_meta": [
                 {
                     "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+                    "home_name": "FC Volendam",
                     "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
+                    "visiting_name": "Sparta Rotterdam",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",

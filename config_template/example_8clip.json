@@ -29,7 +29,9 @@
             "clip_meta": [
                 {
                     "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+                    "home_name": "FC Volendam",
                     "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
+                    "visiting_name": "Sparta Rotterdam",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
@@ -47,13 +49,15 @@
             "clip_meta": [
                 {
                     "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+                    "home_name": "FC Volendam",
                     "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
+                    "visiting_name": "Sparta Rotterdam",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
-                    "player_name": "Chris Christofferson",
+                    "player_name": "Mikael Mikaelson",
                     "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
@@ -65,13 +69,15 @@
             "clip_meta": [
                 {
                     "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+                    "home_name": "FC Volendam",
                     "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
+                    "visiting_name": "Sparta Rotterdam",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
-                    "player_name": "Adam Adamson",
+                    "player_name": "Mikael Mikaelson",
                     "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
@@ -83,13 +89,15 @@
             "clip_meta": [
                 {
                     "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+                    "home_name": "FC Volendam",
                     "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
+                    "visiting_name": "Sparta Rotterdam",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
-                    "player_name": "Lars Larson",
+                    "player_name": "Mikael Mikaelson",
                     "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
@@ -101,13 +109,15 @@
             "clip_meta": [
                 {
                     "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+                    "home_name": "FC Volendam",
                     "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
+                    "visiting_name": "Sparta Rotterdam",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
-                    "player_name": "Even Evenson",
+                    "player_name": "Mikael Mikaelson",
                     "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
@@ -119,13 +129,15 @@
             "clip_meta": [
                 {
                     "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+                    "home_name": "FC Volendam",
                     "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
+                    "visiting_name": "Sparta Rotterdam",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
-                    "player_name": "Sam Samson",
+                    "player_name": "Mikael Mikaelson",
                     "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
@@ -137,13 +149,15 @@
             "clip_meta": [
                 {
                     "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+                    "home_name": "FC Volendam",
                     "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
+                    "visiting_name": "Sparta Rotterdam",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
-                    "player_name": "Ibra Ibrahimovic",
+                    "player_name": "Mikael Mikaelson",
                     "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
@@ -155,13 +169,15 @@
             "clip_meta": [
                 {
                     "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
+                    "home_name": "FC Volendam",
                     "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
+                    "visiting_name": "Sparta Rotterdam",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
-                    "player_name": "Ole Olenson",
+                    "player_name": "Mikael Mikaelson",
                     "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
