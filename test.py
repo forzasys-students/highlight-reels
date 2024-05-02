@@ -1,10 +1,12 @@
-import os
 
-def verify_file(filename):
-    return filename and os.path.exists(filename) and os.path.getsize(filename) > 0
+width = 1920
+height = 1080
+x_offset = 0.42
+y_offset = 0.33
+end_y_offset = 0.4
 
-name = 'README.md'
+part1= (width*x_offset)
+part2=part1*2
 
-name = verify_file(name)
-
-print(name)
+img_height = height-((height*end_y_offset) - (height*y_offset))
+print(img_height)

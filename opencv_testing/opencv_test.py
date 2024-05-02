@@ -56,6 +56,40 @@ def rounded_rectangle(src, top_left, bottom_right, color, radius=1, thickness=1,
     cv2.addWeighted(overlay, opacity, src, 1 - opacity, 0, src)
     return src
 
+def generate_rect(width, height, x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), opacity=0.11):
+    # If rectangle is centered both horiz. and vert.
+    if (end_x == 1 and end_y == 1):
+        top_left = (int(width * x_offset), int(height * y_offset))
+        bottom_right = (int(width - top_left[0]), int(height - top_left[1]))
+    # If rectangle is offcenter both horiz. and vert.
+    elif (end_x != 1 and end_y != 1):
+        top_left = (int(width * x_offset), int(height * y_offset))
+        bottom_right = (int(width * end_x), int(height * end_y))
+    # If rectangle is centered only horizontally
+    elif (end_y != 1):
+        top_left = (int(width * x_offset), int(height * y_offset))
+        bottom_right = (int(width - top_left[0]), int(height * end_y))
+
+    rounded_rectangle(frame, top_left, bottom_right, color, radius=0.1, thickness=-1, opacity=opacity)
+    
+def generate_center_text(frame, text, font_size, width, height, x_offset, y_offset, end_x=1, end_y=1, color=(0,0,0), thickness=1):
+    if (end_x == 1 and end_y == 1):
+        center_w = int(width / 2)
+        center_h = int(height / 2)
+    elif (end_x != 1 and end_y != 1):
+        center_w = int(width*x_offset + ((width*end_x - width*x_offset)/2))
+        center_h = int(height*y_offset + ((height*end_y - height*y_offset)/2))
+    elif (end_y != 1):
+        center_w = int(width / 2)
+        center_h = int(height*y_offset + ((height*end_y - height*y_offset)/2))
+    
+    font = cv2.FONT_HERSHEY_DUPLEX
+    text_size, _ = cv2.getTextSize(text, font, font_size, thickness)
+    text_origin = (int(center_w - text_size[0] / 2), int(center_h + text_size[1] / 2))
+
+    cv2.putText(frame, text, (text_origin[0], text_origin[1]), font, font_size, color, thickness, cv2.LINE_AA)
+
+
 input_video_path = 'opencv_testing/video_16_9.mp4'
 output_video_path = 'opencv_testing/16_9_meta.mp4'
 
@@ -75,46 +109,49 @@ width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 duration = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
+font = cv2.FONT_HERSHEY_SIMPLEX
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
 
 
-def generate_rect(width, height, x_offset, y_offset, end_x_offset=1, end_y_offset=1, color=(255, 255, 255)):
-    # If rectangle is centered both horiz. and vert.
-    if (end_y_offset == 1 and end_x_offset == 1):
-        top_left = (int(width * x_offset), int(height * y_offset))
-        bottom_right = (int(width - top_left[0]), int(height - top_left[1]))
-    # If rectangle is offcenter both horiz. and vert.
-    elif (end_x_offset != 1 and end_y_offset != 1):
-        top_left = (int(width * x_offset), int(height * y_offset))
-        bottom_right = (int(width * end_x_offset), int(height * end_y_offset))
-    # If rectangle is centered only horizontally
-    elif (end_y_offset != 1):
-        top_left = (int(width * x_offset), int(height * y_offset))
-        bottom_right = (int(width - top_left[0]), int(height * end_y_offset))
 
-    rounded_rectangle(frame, top_left, bottom_right, color, radius=0.1, thickness=-1, opacity=0.11)
-    
 # 16 9 aspect ratio
 #page 1
-big_x = 0.14
-big_y = 0.4045
+p1_big_x = 0.14
+p1_big_y = 0.4045
 
-small_x = 0.42
-small_y = 0.33
-small_end_y = 0.4
+p1_small_x = 0.31
+p1_small_y = 0.33
+p1_small_end_y = 0.4
+p1_small_font = 2
 
 #page 2
-league_x = 0.03
-league_y = 0.03
-league_end_x = 0.375
-league_end_y = 0.065
+p2_x = 0.03
+p2_end_x = 0.375
 
+p2_small_y = 0.03
+p2_small_end_y = 0.065
+p2_small_font = 1
 
+p2_big_y = 0.081
+p2_big_end_y = 0.185
 
+player_y = 0.88
+player_end_y = 0.95
 
-print(duration)
+#page 3
+p3_small_x = 0.35
+p3_small_y = 0.51
+p3_small_end_y = 0.56
+p3_small_font = 1.2
+
+p3_x = 0.34
+
+p3_big_y = 0.58
+p3_big_end_y = 0.65
+
+p3_player_end_y = 0.75
+
 i = 1
 while True:
     ret, frame = cap.read()
@@ -123,12 +160,25 @@ while True:
     i += 1
     # Fade-in effect goalstamp & match-info
     if i < int(duration * 0.1):
-        generate_rect(width, height, big_x, big_y)
-        generate_rect(width, height, small_x, small_y, end_y_offset=small_end_y)
-    
+        generate_rect(width, height, p1_big_x, p1_big_y)
+        generate_rect(width, height, p1_small_x, p1_small_y, end_y=p1_small_end_y)
+        generate_center_text(frame, "ALLSVENSKAN", p1_small_font, width, height, p1_small_x, p1_small_y, end_y=p1_small_end_y)
+        
     if i > int(duration* 0.08):
-        generate_rect(width, height, league_x, league_y, league_end_x, league_end_y)
+        generate_rect(width, height, p2_x, p2_small_y, p2_end_x, p2_small_end_y)
+        generate_center_text(frame, "ALLSVENSKAN", p2_small_font, width, height, p2_x, p2_small_y, end_x=p2_end_x, end_y=p2_small_end_y)
+        generate_rect(width, height, p2_x, p2_big_y, p2_end_x, p2_big_end_y)
 
+    if i > int(duration * 0.4) and i < (duration * 0.7):
+        generate_rect(width, height, p2_x, player_y, p2_end_x, player_end_y)
+
+    if i > (duration * 0.8):
+        generate_rect(width, height, p3_small_x, p3_small_y, end_y=p3_small_end_y)
+        generate_center_text(frame, "ALLSVENSKAN", p3_small_font, width, height, p3_small_x, p3_small_y, end_y=p3_small_end_y)
+
+        generate_rect(width, height, p3_x, p3_big_end_y, end_y=p3_player_end_y)
+        generate_rect(width, height, p3_x, p3_big_y, end_y=p3_big_end_y, opacity=0)
+    
     out.write(frame)
     
 cap.release()

@@ -1,34 +1,33 @@
-import os
-import numpy as np
+
 import cv2
-from PIL import Image, ImageDraw, ImageFont
+import numpy as np
+import math
 
-input_image_path = 'opencv_testing/16_9_image.jpg'  # Change this to the path of your input image
-output_image_path = 'opencv_testing/image_with_graphics.jpg'  # Output image path
+# Create a black image (all zeros)
+image = 255 * np.ones((500, 500, 3), dtype=np.uint8)
 
-image = cv2.imread(input_image_path)
-if image is None:
-    print('Error opening image')
-    exit()
+# Define circle parameters
+CENTER = (100, 100)
 
-# Convert BGR image to RGBA format (PIL uses RGBA)
-image_rgba = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
-pil_image = Image.fromarray(image_rgba)
+cv2.circle(image, CENTER, 96, (127,0,127), -1)
 
-# Define graphics parameters
-msg_font_size = 25
-overlay_position_y_offset = 0.92
-overlay_position_x_offset = 0.05
+font = cv2.FONT_HERSHEY_SIMPLEX
+TEXT_SCALE = 1.5
+TEXT_THICKNESS = 2
+text = "Hello Joseph!!"
+text_size = cv2.getTextSize(text, font, 1, 2)[0]
 
-# Create a drawing object
-draw = ImageDraw.Draw(pil_image)
+TEXT_FACE = cv2.FONT_HERSHEY_DUPLEX
+TEXT_SCALE = 1.5
+TEXT_THICKNESS = 2
+TEXT = "test"
 
-# Draw graphics on the image
-draw.rectangle([(50, 50), (200, 200)], outline=(255, 0, 0), width=3)  # Example rectangle
+text_size, _ = cv2.getTextSize(TEXT, TEXT_FACE, TEXT_SCALE, TEXT_THICKNESS)
+text_origin = (int(CENTER[0] - text_size[0] / 2), int(CENTER[1] + text_size[1] / 2))
 
-# Convert back to BGR format for OpenCV
-image_with_graphics = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGBA2BGR)
+cv2.putText(image, TEXT, (text_origin[0], text_origin[1]), TEXT_FACE, TEXT_SCALE, (127,255,127), TEXT_THICKNESS, cv2.LINE_AA)
 
-# Save the image with graphics
-cv2.imwrite(output_image_path, image_with_graphics)
-print(f"Image with graphics saved at '{output_image_path}'")
+# Save the image
+cv2.imwrite("circle_image.jpg", image)
+
+print("Image saved as 'circle_image.jpg'")
