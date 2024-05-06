@@ -56,7 +56,8 @@ def rounded_rectangle(src, top_left, bottom_right, color, radius=1, thickness=1,
     cv2.addWeighted(overlay, opacity, src, 1 - opacity, 0, src)
     return src
 
-def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), opacity=0.11, width=1920, height=1080):
+def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), opacity=0.11, width=1920, height=1080, text=[], font_scale=1):
+    global font_style
     # If rectangle is centered both horiz. and vert.
     if (end_x == 1 and end_y == 1):
         top_left = (int(width * x_offset), int(height * y_offset))
@@ -70,9 +71,40 @@ def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), o
         top_left = (int(width * x_offset), int(height * y_offset))
         bottom_right = (int(width - top_left[0]), int(height * end_y))
 
+    if text:
+        text_size = cv2.getTextSize(max(text, key=len), font_style, ((bottom_right[1]-top_left[1])*font_scale)/22, 2)
+        text_width = int(text_size[0][0])
+        new_top_left = ["",""] 
+        new_bottom_right = ["",""]
+        new_top_left[1] = top_left[1]
+        new_bottom_right[1] = bottom_right[1]
+        
+        if (end_x == 1 and end_y == 1):
+            if len(text) == 2:
+                new_top_left[0] = int(top_left[0] - text_width)
+                new_bottom_right[0] = int(bottom_right[0] + text_width)
+            else:
+                new_top_left[0] = int(top_left[0] - text_width/2)
+                new_bottom_right[0] = int(bottom_right[0] + text_width/2)
+        elif (end_y != 1):
+            if len(text) == 2:
+                new_top_left[0] = int(top_left[0] - text_width)
+                new_bottom_right[0] = int(bottom_right[0] + text_width)
+            else:
+                new_top_left[0] = int(top_left[0] - text_width/2)
+                new_bottom_right[0] = int(bottom_right[0] + text_width/2)
+        elif (end_x != 1 and end_y != 1):
+                new_top_left = top_left[0]
+                new_bottom_right[0] = int(bottom_right[0] + text_width/2)
+
+        top_left = tuple(new_top_left)
+        bottom_right = tuple(new_bottom_right)
+
     rounded_rectangle(frame, top_left, bottom_right, color, radius=0.1, thickness=-1, opacity=opacity)
-    
-def generate_center_text(frame, text, font_size, x_offset, y_offset, end_x=1, end_y=1, position=0, color=(0,0,0), thickness=1, width=1920, height=1080):
+    return bottom_right[1]-top_left[1] # Return height of rect for calculating font size
+
+def generate_center_text(frame, text, x_offset, y_offset, end_x=1, end_y=1, position=0, color=(0,0,0), thickness=2, width=1920, height=1080, rect_h=0, font_scale=1):
+    global font_style
     if (end_x == 1 and end_y == 1):
         center_w = int(width / 2)
         center_h = int(height / 2)
@@ -92,16 +124,21 @@ def generate_center_text(frame, text, font_size, x_offset, y_offset, end_x=1, en
             w_offset = int((width - 2*(x_offset*width))*position)
             center_w = center_w - w_offset
     
-    font = cv2.FONT_HERSHEY_DUPLEX
-    text_size, _ = cv2.getTextSize(text, font, font_size, thickness)
+    if rect_h != 0:
+        font_scale = (rect_h)/22 # Scale the font, 22 meaning the standard size of the font in pixels
+    else:
+        font_scale = font_scale
+    
+    text_size, _ = cv2.getTextSize(text, font_style, font_scale, thickness)
+    
     text_origin = (int(center_w - text_size[0] / 2), int(center_h + text_size[1] / 2))
 
-    cv2.putText(frame, text, (text_origin[0], text_origin[1]), font, font_size, color, thickness, cv2.LINE_AA)
+    cv2.putText(frame, text, (text_origin[0], text_origin[1]), font_style, font_scale, color, thickness, cv2.LINE_AA)
 
 def is_image(var):
     return isinstance(var, Image.Image)
 
-def generate_center_logo(temp_image, logo, logo_w, logo_h, x_offset, y_offset, end_x=1, end_y=1, position=0, width=1920, height=1080):
+def generate_center_logo(frame, logo, logo_w, logo_h, x_offset, y_offset, end_x=1, end_y=1, position=0, width=1920, height=1080):
     if (end_x == 1 and end_y == 1):
         center_w = int(width / 2)
         center_h = int(height / 2)
@@ -122,16 +159,27 @@ def generate_center_logo(temp_image, logo, logo_w, logo_h, x_offset, y_offset, e
             center_w = center_w - w_offset
 
     if not is_image(logo):
-        image = Image.open(f"resources/img/{logo}")
+        logo = Image.open(f"resources/img/{logo}")
         
-
     new_size = (logo_w, logo_h)
 
-    resized_image = image.resize(new_size)
+    resized_image = logo.resize(new_size)
 
-    logo_origin = (int(center_w - new_size[0] / 2), int(center_h + new_size[1] / 2))
+    logo_origin = (int(center_w - new_size[0] / 2), int(center_h - new_size[1] / 2))
 
-    temp_image.paste(resized_image, (logo_origin[0], logo_origin[1]))
+    # Convert cv2 image to PIL image for "paste()"
+    frame_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    frame_copy = frame_pil.copy()
+
+    frame_copy.paste(resized_image, (logo_origin[0], logo_origin[1]), resized_image)
+
+    # Convert PIL image back to cv2 image
+    frame = cv2.cvtColor(np.array(frame_copy), cv2.COLOR_RGB2BGR)
+
+    return frame
+
+def calculate_rect_with_msg(msg, font, font_scale, width=1920, height=1080):
+    pass
 
 input_video_path = 'opencv_testing/video_2.mp4'
 output_video_path = 'opencv_testing/16_9_meta.mp4'
@@ -152,22 +200,22 @@ width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 duration = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-font = cv2.FONT_HERSHEY_SIMPLEX
+font_style = cv2.FONT_HERSHEY_SIMPLEX
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
 
-
-
 # 16 9 aspect ratio
 #page 1
-p1_big_x = 0.14
+p1_big_x = 0.36
 p1_big_y = 0.4045
-p1_team_font = 1
+p1_home = "Sparta Rotterdam FC"
+p1_visiting = "FC Volendam"
 
-p1_small_x = 0.31
+p1_small_x = 0.47
 p1_small_y = 0.33
 p1_small_end_y = 0.4
-p1_small_font = 2
+p1_small_font = 47/22
+p1_small_msg = "ALLSVENSKANghghghhg"
 
 #page 2
 p2_x = 0.03
@@ -175,11 +223,9 @@ p2_end_x = 0.375
 
 p2_small_y = 0.03
 p2_small_end_y = 0.065
-p2_small_font = 1
 
 p2_big_y = 0.081
 p2_big_end_y = 0.185
-p2_big_font = 1.5
 
 player_y = 0.88
 player_end_y = 0.95
@@ -188,7 +234,6 @@ player_end_y = 0.95
 p3_small_x = 0.35
 p3_small_y = 0.51
 p3_small_end_y = 0.56
-p3_small_font = 1.2
 
 p3_x = 0.34
 
@@ -202,46 +247,49 @@ while True:
     ret, frame = cap.read()
     if not ret:
         break
-    image = Image.fromarray(frame)
     i += 1
-
-    temp_image = image.copy()
-    draw_temp = ImageDraw.Draw(temp_image)
 
     # Fade-in effect goalstamp & match-info
     if i < int(duration * 0.1):
         # team vs team rect
-        generate_rect(p1_big_x, p1_big_y)
-        generate_center_text(frame, "Sparta Rotterdam FC", p1_team_font, p1_big_x, p1_big_y, position=0.2) # Positioned centered to the left of rect
-        generate_center_text(frame, "FC Volendam", p1_team_font, p1_big_x, p1_big_y, position=-0.2) # Positioned centered to the right of rect
-        generate_center_logo(temp_image, "allsvenskan.png", 500, 500, p1_big_x, p1_big_y)
+        generate_rect(p1_big_x, p1_big_y, text=[p1_home, p1_visiting], font_scale=0.4)
+        generate_center_text(frame, p1_home, p1_big_x, p1_big_y, position=0.2) # Positioned centered to the left of rect
+        generate_center_text(frame, p1_visiting, p1_big_x, p1_big_y, position=-0.2) # Positioned centered to the right of rect
+        frame = generate_center_logo(frame, "allsvenskan.png", 150, 150, p1_big_x, p1_big_y)
+        frame = generate_center_logo(frame, "rotterdam.png", 150, 150, p1_big_x, p1_big_y, position=0.4)
+        frame = generate_center_logo(frame, "volendam.png", 150, 150, p1_big_x, p1_big_y, position=-0.4)
         # league rect
-        generate_rect(p1_small_x, p1_small_y, end_y=p1_small_end_y)
-        generate_center_text(frame, "ALLSVENSKAN", p1_small_font, p1_small_x, p1_small_y, end_y=p1_small_end_y)
-        
-        
+        p1_small_h = generate_rect(p1_small_x, p1_small_y, end_y=p1_small_end_y, text=[p1_small_msg], font_scale=0.6)
+        generate_center_text(frame, p1_small_msg, p1_small_x, p1_small_y, end_y=p1_small_end_y, rect_h=p1_small_h*0.6) # Scaling the font to 60% of rectangle-height
         
     if i > int(duration* 0.08):
         # p2
         # small league rect (top left)
-        generate_rect(p2_x, p2_small_y, p2_end_x, p2_small_end_y)
-        generate_center_text(frame, "ALLSVENSKAN", p2_small_font, p2_x, p2_small_y, end_x=p2_end_x, end_y=p2_small_end_y)
+        p2_small_h = generate_rect(p2_x, p2_small_y, p2_end_x, p2_small_end_y)
+        generate_center_text(frame, "ALLSVENSKAN",p2_x, p2_small_y, end_x=p2_end_x, end_y=p2_small_end_y, rect_h=p2_small_h*0.75)
         # scoreboard
-        generate_rect(p2_x, p2_big_y, p2_end_x, p2_big_end_y)
-        generate_center_text(frame, "05:20", p2_big_font, p2_x, p2_big_y, p2_end_x, p2_big_end_y)
-        generate_center_text(frame, "1", p2_big_font, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=0.4)
-        generate_center_text(frame, "2", p2_big_font, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.4)
-        generate_center_text(frame, "logo", p2_big_font, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.25)
+        p2_big_h = generate_rect(p2_x, p2_big_y, p2_end_x, p2_big_end_y)
+        generate_center_text(frame, "05:20", p2_x, p2_big_y, p2_end_x, p2_big_end_y, rect_h=p2_big_h*0.5)
+        generate_center_text(frame, "1", p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=0.4, rect_h=p2_big_h*0.6)
+        generate_center_text(frame, "2", p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.4, rect_h=p2_big_h*0.6)
+        frame = generate_center_logo(frame, "rotterdam.png", 100, 100, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=0.25)
+        frame = generate_center_logo(frame, "volendam.png", 100, 100, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.25)
     if i > int(duration * 0.4) and i < (duration * 0.7):
         generate_rect(p2_x, player_y, p2_end_x, player_end_y)
 
     if i > (duration * 0.8):
-        generate_rect(p3_small_x, p3_small_y, end_y=p3_small_end_y)
-        generate_center_text(frame, "ALLSVENSKAN", p3_small_font, p3_small_x, p3_small_y, end_y=p3_small_end_y)
-
-        generate_rect(p3_x, p3_big_end_y, end_y=p3_player_end_y)
+        # League rect
+        p3_small_h = generate_rect(p3_small_x, p3_small_y, end_y=p3_small_end_y)
+        generate_center_text(frame, "ALLSVENSKAN", p3_small_x, p3_small_y, end_y=p3_small_end_y, rect_h=p3_small_h*0.75)
+        
+        # Action performed by player
         generate_rect(p3_x, p3_big_y, end_y=p3_big_end_y, opacity=0)
-    
+        generate_center_text(frame, "Sparta Rotterdam FC", p3_x, p3_big_y, end_y=p3_big_end_y, position=-.1)
+        frame = generate_center_logo(frame, "rotterdam.png", 75, 75, p3_x, p3_big_y, end_y=p3_big_end_y, position=0.35)
+        generate_rect(p3_x, p3_big_end_y, end_y=p3_player_end_y)
+        generate_center_text(frame, "Player name name name", p3_x, p3_big_end_y, end_y=p3_player_end_y, position=-.1)
+        frame = generate_center_logo(frame, "football.png", 75, 75, p3_x, p3_big_end_y, end_y=p3_player_end_y, position=0.35)
+
     out.write(frame)
     
 cap.release()
