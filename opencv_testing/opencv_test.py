@@ -1,7 +1,7 @@
 import cv2
 import os
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageColor
 
 def rounded_rectangle(src, top_left, bottom_right, color, radius=1, thickness=1, opacity=1, line_type=cv2.LINE_AA):
     overlay = src.copy()
@@ -56,8 +56,8 @@ def rounded_rectangle(src, top_left, bottom_right, color, radius=1, thickness=1,
     cv2.addWeighted(overlay, opacity, src, 1 - opacity, 0, src)
     return src
 
-def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), opacity=0.11, width=1920, height=1080, text=[], font_scale=1):
-    global font_style
+def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), text=[], font_scale=1, isRounded=False):
+    global font_style, opacity, width, height, style, frame
     # If rectangle is centered both horiz. and vert.
     if (end_x == 1 and end_y == 1):
         top_left = (int(width * x_offset), int(height * y_offset))
@@ -99,12 +99,18 @@ def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), o
 
         top_left = tuple(new_top_left)
         bottom_right = tuple(new_bottom_right)
-
-    rounded_rectangle(frame, top_left, bottom_right, color, radius=0.1, thickness=-1, opacity=opacity)
+    
+    if style == "pakke1":
+        rounded_rectangle(frame, top_left, bottom_right, color, radius=0.1, thickness=-1, opacity=opacity)
+    elif isRounded:
+        rounded_rectangle(frame, top_left, bottom_right, color, radius=0.1, thickness=-1, opacity=opacity)
+    else:
+        cv2.rectangle(frame, top_left, bottom_right, color, -1)
     return bottom_right[1]-top_left[1] # Return height of rect for calculating font size
 
-def generate_center_text(frame, text, x_offset, y_offset, end_x=1, end_y=1, position=0, color=(0,0,0), thickness=2, width=1920, height=1080, rect_h=0, font_scale=1):
-    global font_style
+def generate_center_text(text, x_offset, y_offset, end_x=1, end_y=1, position=0, color=(0,0,0), thickness=2, rect_h=0, font_scale=1):
+    global font_style, frame, height, width
+    
     if (end_x == 1 and end_y == 1):
         center_w = int(width / 2)
         center_h = int(height / 2)
@@ -138,7 +144,8 @@ def generate_center_text(frame, text, x_offset, y_offset, end_x=1, end_y=1, posi
 def is_image(var):
     return isinstance(var, Image.Image)
 
-def generate_center_logo(frame, logo, logo_w, logo_h, x_offset, y_offset, end_x=1, end_y=1, position=0, width=1920, height=1080):
+def generate_center_logo(logo, logo_w, logo_h, x_offset, y_offset, end_x=1, end_y=1, position=0, keepRatio=False):
+    global width, height, frame
     if (end_x == 1 and end_y == 1):
         center_w = int(width / 2)
         center_h = int(height / 2)
@@ -163,7 +170,11 @@ def generate_center_logo(frame, logo, logo_w, logo_h, x_offset, y_offset, end_x=
         
     new_size = (logo_w, logo_h)
 
-    resized_image = logo.resize(new_size)
+    if keepRatio:
+        # Not working, ValueError: use 4-item box
+        resized_image = logo.thumbnail((new_size)) 
+    else:
+        resized_image = logo.resize(new_size)
 
     logo_origin = (int(center_w - new_size[0] / 2), int(center_h - new_size[1] / 2))
 
@@ -180,6 +191,12 @@ def generate_center_logo(frame, logo, logo_w, logo_h, x_offset, y_offset, end_x=
 
 def calculate_rect_with_msg(msg, font, font_scale, width=1920, height=1080):
     pass
+
+def hex_to_bgr(hex):
+    rgb = list(ImageColor.getcolor(hex, "RGB"))
+    rgb[0], rgb[-1] = rgb[-1], rgb[0]
+    bgr = tuple(rgb)
+    return bgr
 
 input_video_path = 'opencv_testing/video_2.mp4'
 output_video_path = 'opencv_testing/16_9_meta.mp4'
@@ -204,43 +221,75 @@ font_style = cv2.FONT_HERSHEY_SIMPLEX
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
 
-# 16 9 aspect ratio
-#page 1
-p1_big_x = 0.36
-p1_big_y = 0.4045
-p1_home = "Sparta Rotterdam FC"
-p1_visiting = "FC Volendam"
+style = "pakke2"
 
-p1_small_x = 0.47
-p1_small_y = 0.33
-p1_small_end_y = 0.4
-p1_small_font = 47/22
-p1_small_msg = "ALLSVENSKANghghghhg"
+if style == "pakke1":
+    opacity = 0.11
+    # 16 9 aspect ratio
+    #page 1
+    p1_big_x = 0.36
+    p1_big_y = 0.4045
+    p1_home = "Sparta Rotterdam FC"
+    p1_visiting = "FC Volendam"
 
-#page 2
-p2_x = 0.03
-p2_end_x = 0.375
+    p1_small_x = 0.47
+    p1_small_y = 0.33
+    p1_small_end_y = 0.4
+    p1_small_font = 47/22
+    p1_small_msg = "ALLSVENSKANghghghhg"
 
-p2_small_y = 0.03
-p2_small_end_y = 0.065
+    #page 2
+    p2_x = 0.03
+    p2_end_x = 0.375
 
-p2_big_y = 0.081
-p2_big_end_y = 0.185
+    p2_small_y = 0.03
+    p2_small_end_y = 0.065
 
-player_y = 0.88
-player_end_y = 0.95
+    p2_big_y = 0.081
+    p2_big_end_y = 0.185
 
-#page 3
-p3_small_x = 0.35
-p3_small_y = 0.51
-p3_small_end_y = 0.56
+    player_y = 0.88
+    player_end_y = 0.95
 
-p3_x = 0.34
+    #page 3
+    p3_small_x = 0.35
+    p3_small_y = 0.51
+    p3_small_end_y = 0.56
 
-p3_big_y = 0.58
-p3_big_end_y = 0.65
+    p3_x = 0.34
 
-p3_player_end_y = 0.75
+    p3_big_y = 0.58
+    p3_big_end_y = 0.65
+
+    p3_player_end_y = 0.75
+
+if style == "pakke2":
+    # Scoreboard
+    sc_color_black = hex_to_bgr("#343434") # 52 52 52
+    sc_color_white = hex_to_bgr("#FFFFFF")
+    sc_color_team1 = hex_to_bgr("#F26617")
+    sc_color_team2 = hex_to_bgr("#DD253C")
+    # y-offset
+    sc_y_start = 0.055
+    sc_y_end = 0.1
+
+    # x-offset
+    sc_team1_logo_start = 0.04
+    sc_team1_logo_end = 0.065 #0.025
+    sc_team1_color_end = 0.068
+    sc_team1_name_end = 0.113
+    sc_team1_score_end = 0.137
+
+    sc_team2_score_start = 0.198
+    sc_team2_score_end = 0.223
+    sc_team2_name_end = 0.272
+    sc_team2_color_start = 0.269
+    sc_team2_logo_end = 0.297
+
+    # Icons !! Aspect ratio is not kept !!
+    sc_league_logo_dim = int((sc_team2_score_start*width - sc_team1_score_end*width)*0.7)
+    sc_team1_logo_dim = int((sc_team1_logo_end*width - sc_team1_logo_start)*0.9)
+    sc_team2_logo_dim = int((sc_team1_logo_end*width - sc_team1_logo_start)*0.9)
 
 i = 1
 while True:
@@ -248,48 +297,62 @@ while True:
     if not ret:
         break
     i += 1
+    if style == "pakke1":
+        # Fade-in effect goalstamp & match-info
+        if i < int(duration * 0.1):
+            # team vs team rect
+            generate_rect(p1_big_x, p1_big_y, text=[p1_home, p1_visiting], font_scale=0.4)
+            generate_center_text(p1_home, p1_big_x, p1_big_y, position=0.2) # Positioned centered to the left of rect
+            generate_center_text(p1_visiting, p1_big_x, p1_big_y, position=-0.2) # Positioned centered to the right of rect
+            frame = generate_center_logo("allsvenskan.png", 150, 150, p1_big_x, p1_big_y)
+            frame = generate_center_logo("rotterdam.png", 150, 150, p1_big_x, p1_big_y, position=0.4)
+            frame = generate_center_logo("volendam.png", 150, 150, p1_big_x, p1_big_y, position=-0.4)
+            # league rect
+            p1_small_h = generate_rect(p1_small_x, p1_small_y, end_y=p1_small_end_y, text=[p1_small_msg], font_scale=0.6)
+            generate_center_text(p1_small_msg, p1_small_x, p1_small_y, end_y=p1_small_end_y, rect_h=p1_small_h*0.6) # Scaling the font to 60% of rectangle-height
+            
+        if i > int(duration* 0.08):
+            # p2
+            # small league rect (top left)
+            p2_small_h = generate_rect(p2_x, p2_small_y, p2_end_x, p2_small_end_y)
+            generate_center_text("ALLSVENSKAN",p2_x, p2_small_y, end_x=p2_end_x, end_y=p2_small_end_y, rect_h=p2_small_h*0.75)
+            # scoreboard
+            p2_big_h = generate_rect(p2_x, p2_big_y, p2_end_x, p2_big_end_y)
+            generate_center_text("05:20", p2_x, p2_big_y, p2_end_x, p2_big_end_y, rect_h=p2_big_h*0.5)
+            generate_center_text("1", p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=0.4, rect_h=p2_big_h*0.6)
+            generate_center_text("2", p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.4, rect_h=p2_big_h*0.6)
+            frame = generate_center_logo("rotterdam.png", 100, 100, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=0.25)
+            frame = generate_center_logo("volendam.png", 100, 100, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.25)
+        if i > int(duration * 0.4) and i < (duration * 0.7):
+            generate_rect(p2_x, player_y, p2_end_x, player_end_y)
 
-    # Fade-in effect goalstamp & match-info
-    if i < int(duration * 0.1):
-        # team vs team rect
-        generate_rect(p1_big_x, p1_big_y, text=[p1_home, p1_visiting], font_scale=0.4)
-        generate_center_text(frame, p1_home, p1_big_x, p1_big_y, position=0.2) # Positioned centered to the left of rect
-        generate_center_text(frame, p1_visiting, p1_big_x, p1_big_y, position=-0.2) # Positioned centered to the right of rect
-        frame = generate_center_logo(frame, "allsvenskan.png", 150, 150, p1_big_x, p1_big_y)
-        frame = generate_center_logo(frame, "rotterdam.png", 150, 150, p1_big_x, p1_big_y, position=0.4)
-        frame = generate_center_logo(frame, "volendam.png", 150, 150, p1_big_x, p1_big_y, position=-0.4)
-        # league rect
-        p1_small_h = generate_rect(p1_small_x, p1_small_y, end_y=p1_small_end_y, text=[p1_small_msg], font_scale=0.6)
-        generate_center_text(frame, p1_small_msg, p1_small_x, p1_small_y, end_y=p1_small_end_y, rect_h=p1_small_h*0.6) # Scaling the font to 60% of rectangle-height
-        
-    if i > int(duration* 0.08):
-        # p2
-        # small league rect (top left)
-        p2_small_h = generate_rect(p2_x, p2_small_y, p2_end_x, p2_small_end_y)
-        generate_center_text(frame, "ALLSVENSKAN",p2_x, p2_small_y, end_x=p2_end_x, end_y=p2_small_end_y, rect_h=p2_small_h*0.75)
-        # scoreboard
-        p2_big_h = generate_rect(p2_x, p2_big_y, p2_end_x, p2_big_end_y)
-        generate_center_text(frame, "05:20", p2_x, p2_big_y, p2_end_x, p2_big_end_y, rect_h=p2_big_h*0.5)
-        generate_center_text(frame, "1", p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=0.4, rect_h=p2_big_h*0.6)
-        generate_center_text(frame, "2", p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.4, rect_h=p2_big_h*0.6)
-        frame = generate_center_logo(frame, "rotterdam.png", 100, 100, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=0.25)
-        frame = generate_center_logo(frame, "volendam.png", 100, 100, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.25)
-    if i > int(duration * 0.4) and i < (duration * 0.7):
-        generate_rect(p2_x, player_y, p2_end_x, player_end_y)
+        if i > (duration * 0.8):
+            # League rect
+            p3_small_h = generate_rect(p3_small_x, p3_small_y, end_y=p3_small_end_y)
+            generate_center_text("ALLSVENSKAN", p3_small_x, p3_small_y, end_y=p3_small_end_y, rect_h=p3_small_h*0.75)
+            
+            # Action performed by player
+            generate_rect(p3_x, p3_big_y, end_y=p3_big_end_y, opacity=0)
+            generate_center_text("Sparta Rotterdam FC", p3_x, p3_big_y, end_y=p3_big_end_y, position=-.1)
+            frame = generate_center_logo(frame, "rotterdam.png", 75, 75, p3_x, p3_big_y, end_y=p3_big_end_y, position=0.35)
+            generate_rect(p3_x, p3_big_end_y, end_y=p3_player_end_y)
+            generate_center_text("Player name name name", p3_x, p3_big_end_y, end_y=p3_player_end_y, position=-.1)
+            frame = generate_center_logo("football.png", 75, 75, p3_x, p3_big_end_y, end_y=p3_player_end_y, position=0.35)
+    elif style == "pakke2":
+        if i > int(duration * 0.1):
+            generate_rect(sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end, sc_color_black) # Logo
+            generate_rect(sc_team1_logo_end, sc_y_start, sc_team1_name_end, sc_y_end, sc_color_black) # Name
+            generate_rect(sc_team1_logo_end, sc_y_start, sc_team1_color_end, sc_y_end, sc_color_team1) # Color
+            generate_rect(sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, sc_color_white) # Score
 
-    if i > (duration * 0.8):
-        # League rect
-        p3_small_h = generate_rect(p3_small_x, p3_small_y, end_y=p3_small_end_y)
-        generate_center_text(frame, "ALLSVENSKAN", p3_small_x, p3_small_y, end_y=p3_small_end_y, rect_h=p3_small_h*0.75)
-        
-        # Action performed by player
-        generate_rect(p3_x, p3_big_y, end_y=p3_big_end_y, opacity=0)
-        generate_center_text(frame, "Sparta Rotterdam FC", p3_x, p3_big_y, end_y=p3_big_end_y, position=-.1)
-        frame = generate_center_logo(frame, "rotterdam.png", 75, 75, p3_x, p3_big_y, end_y=p3_big_end_y, position=0.35)
-        generate_rect(p3_x, p3_big_end_y, end_y=p3_player_end_y)
-        generate_center_text(frame, "Player name name name", p3_x, p3_big_end_y, end_y=p3_player_end_y, position=-.1)
-        frame = generate_center_logo(frame, "football.png", 75, 75, p3_x, p3_big_end_y, end_y=p3_player_end_y, position=0.35)
+            generate_rect(sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, sc_color_white) # Score
+            generate_rect(sc_team2_score_end, sc_y_start, sc_team2_name_end, sc_y_end, sc_color_black) # Name
+            generate_rect(sc_team2_color_start, sc_y_start, sc_team2_name_end, sc_y_end, sc_color_team2) # Color
+            generate_rect(sc_team2_name_end, sc_y_start, sc_team2_logo_end, sc_y_end, sc_color_black) # Logo
 
+            frame = generate_center_logo("allsvenskan.png", sc_league_logo_dim, sc_league_logo_dim, sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end)
+            frame = generate_center_logo("volendam.png", sc_team1_logo_dim, sc_team1_logo_dim, sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end)
+            frame = generate_center_logo("rotterdam.png",sc_team2_logo_dim, sc_team2_logo_dim,sc_team2_name_end, sc_y_start,sc_team2_logo_end, sc_y_end)
     out.write(frame)
     
 cap.release()

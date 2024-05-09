@@ -481,56 +481,21 @@ def user_options():
         if choice == '1':
             config = 'example_1clip.json'
             current_path_config = path_config(config)
-            while True:
-                print("Choose an action for the clip (default: goal): \n1. Goal\n2. Shot\n3. Yellow card\n4. Red card\n5. Penalty")
-                choice = input("Enter your choice (1/2/3/4/5): ")
-                if choice == '1':
-                    modify_config(config, cmeta, 'goal')
-                elif choice == '2':
-                    modify_config(config, cmeta, 'shot')
-                elif choice == '3':
-                    modify_config(config, cmeta, 'yellow card')
-                elif choice == '4':
-                    modify_config(config, cmeta, 'red card')
-                elif choice == '5':
-                    modify_config(config, cmeta, 'penalty')
-                else:
-                    print(f"Error resolving input '{choice}'")
-                    continue
-                break
-            break
+            
         elif choice == '2':
             config = 'example_8clip.json'
             current_path_config = path_config(config)
-            num_clip = 0
-            while num_clip < count_clips(config):
-                while True:
-                    print(f"Choose an action for clip #{num_clip+1} (default: goal): \n1. Goal\n2. Shot\n3. Yellow card\n4. Red card\n5. Penalty")
-                    choice = input("Enter your choice (1/2/3/4/5): ")
-                    if choice == '1':
-                        modify_config(config, cmeta, 'goal', num_clip)
-                    elif choice == '2':
-                        modify_config(config, cmeta, 'shot', num_clip)
-                    elif choice == '3':
-                        modify_config(config, cmeta, 'yellow card', num_clip)
-                    elif choice == '4':
-                        modify_config(config, cmeta, 'red card', num_clip)
-                    elif choice == '5':
-                        modify_config(config, cmeta, 'penalty', num_clip) 
-                    else:
-                        print(f"Error resolving input '{choice}'")
-                        continue
-                    num_clip += 1
-                    break
-            break
+            
         else:
             print(f"Error resolving input '{choice}'")
-
+            continue
+        break
+    
     while True:
         ptemp = 'platform'
         atemp = 'aspect_ratio'
         print("Choose a platform for encoding (default: youtube): \n1. Youtube (16:9)\n2. Tiktok (9:16)\n3. Instagram (1:1)\n4. Facebook (1:1)")
-        coice = input("Enter your choice (1/2/3/4): ")
+        choice = input("Enter your choice (1/2/3/4): ")
 
         if choice == '1' or choice == 'youtube':
             modify_config(config, ptemp, 'youtube')

@@ -27,7 +27,7 @@
         }
     },
     "custom_template": {
-        "fg_color": "#ffb703",
+        "fg_color": "#111111",
         "bg_color": "#023047",
         "border_color": "#219ebc",
         "text_color": "#FFFFFF",
