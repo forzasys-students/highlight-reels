@@ -353,6 +353,8 @@ while True:
             frame = generate_center_logo("allsvenskan.png", sc_league_logo_dim, sc_league_logo_dim, sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end)
             frame = generate_center_logo("volendam.png", sc_team1_logo_dim, sc_team1_logo_dim, sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end)
             frame = generate_center_logo("rotterdam.png",sc_team2_logo_dim, sc_team2_logo_dim,sc_team2_name_end, sc_y_start,sc_team2_logo_end, sc_y_end)
+
+            generate_center_text()
     out.write(frame)
     
 cap.release()

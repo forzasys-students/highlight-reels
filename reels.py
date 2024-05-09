@@ -474,7 +474,6 @@ def user_options():
     global current_path_config
     config = None
     while True:
-        cmeta = 'action'
         print("Choose a config template (default: example_1clip.json): \n1. example_1clip.json\n2. example_8clip.json")
         choice = input("Enter your choice (1/2): ")
 
@@ -490,7 +489,7 @@ def user_options():
             print(f"Error resolving input '{choice}'")
             continue
         break
-    
+
     while True:
         ptemp = 'platform'
         atemp = 'aspect_ratio'
@@ -514,6 +513,75 @@ def user_options():
             continue
         break
 
+    while True:
+        orientation = ''
+        print("Choose the layout (default: left): \n1. Left\n2. Middle")
+        choice = input("Enter your choice (1/2): ")
+
+        if choice == '1' or choice == 'left':
+            orientation = 'left'
+        elif choice == '2' or choice == 'middle':
+            orientation = 'middle'
+        else:
+            print(f"Error resolving input '{choice}'")
+            continue
+        break
+
+    while True:
+        print(f"Would you like to change the metadata and select a theme?")
+        choice = input("Enter your choice (y/yes/n/no): ")
+
+        if choice == 'yes' or choice == 'y':
+            # Select action for configuration with 1 clip
+            if config == 'example_1clip.json':
+                while True:
+                    cmeta = 'action'
+                    print("Choose an action for the clip (default: goal): \n1. Goal\n2. Shot\n3. Yellow card\n4. Red card\n5. Penalty")
+                    choice = input("Enter your choice (1/2/3/4/5): ")
+                    if choice == '1':
+                        modify_config(config, cmeta, 'goal')
+                    elif choice == '2':
+                        modify_config(config, cmeta, 'shot')
+                    elif choice == '3':
+                        modify_config(config, cmeta, 'yellow card')
+                    elif choice == '4':
+                        modify_config(config, cmeta, 'red card')
+                    elif choice == '5':
+                        modify_config(config, cmeta, 'penalty')
+                    else:
+                        print(f"Error resolving input '{choice}'")
+                        continue
+                    break
+            # Select actions for configuration with multiple clip
+            else:
+                while num_clip < count_clips(config):
+                    while True:
+                        print(f"Choose an action for clip #{num_clip+1} (default: goal): \n1. Goal\n2. Shot\n3. Yellow card\n4. Red card\n5. Penalty")
+                        choice = input("Enter your choice (1/2/3/4/5): ")
+                        if choice == '1':
+                            modify_config(config, cmeta, 'goal', num_clip)
+                        elif choice == '2':
+                            modify_config(config, cmeta, 'shot', num_clip)
+                        elif choice == '3':
+                            modify_config(config, cmeta, 'yellow card', num_clip)
+                        elif choice == '4':
+                            modify_config(config, cmeta, 'red card', num_clip)
+                        elif choice == '5':
+                            modify_config(config, cmeta, 'penalty', num_clip) 
+                        else:
+                            print(f"Error resolving input '{choice}'")
+                            continue
+                        num_clip += 1
+                        break
+            # Select a league and the league's color theme
+            while True:                
+                
+
+        elif choice == 'no' or choice == 'n':
+            break
+        else:
+            print(f"Error resolving input '{choice}'")
+            continue
     while True:
         gtemp = 'graphic_template'
         print("Choose a color template (default: yellow): \n1. Red\n2. Orange\n3. Yellow\n4. Custom")
