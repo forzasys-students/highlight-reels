@@ -222,6 +222,7 @@ fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
 
 style = "pakke2"
+layout = "center"
 
 if style == "pakke1":
     opacity = 0.11
@@ -282,14 +283,28 @@ if style == "pakke2":
 
     sc_team2_score_start = 0.198
     sc_team2_score_end = 0.223
-    sc_team2_name_end = 0.272
-    sc_team2_color_start = 0.269
-    sc_team2_logo_end = 0.297
+    sc_team2_name_end = 0.271
+    sc_team2_color_start = 0.268
+    sc_team2_logo_end = 0.295
 
     # Icons !! Aspect ratio is not kept !!
     sc_league_logo_dim = int((sc_team2_score_start*width - sc_team1_score_end*width)*0.7)
-    sc_team1_logo_dim = int((sc_team1_logo_end*width - sc_team1_logo_start)*0.9)
-    sc_team2_logo_dim = int((sc_team1_logo_end*width - sc_team1_logo_start)*0.9)
+    sc_team1_logo_dim = int((sc_team1_logo_end*width - sc_team1_logo_start*width)*0.9)
+    sc_team2_logo_dim = int((sc_team1_logo_end*width - sc_team1_logo_start*width)*0.9)
+
+    if layout == "center":
+        sc_middle_offset = 0.332
+        sc_team1_logo_start += sc_middle_offset
+        sc_team1_logo_end += sc_middle_offset
+        sc_team1_color_end +=sc_middle_offset
+        sc_team1_name_end += sc_middle_offset
+        sc_team1_score_end +=sc_middle_offset
+
+        sc_team2_score_start += sc_middle_offset
+        sc_team2_score_end +=sc_middle_offset
+        sc_team2_name_end +=  sc_middle_offset
+        sc_team2_color_start +=sc_middle_offset
+        sc_team2_logo_end +=  sc_middle_offset
 
 i = 1
 while True:
@@ -321,8 +336,8 @@ while True:
             generate_center_text("05:20", p2_x, p2_big_y, p2_end_x, p2_big_end_y, rect_h=p2_big_h*0.5)
             generate_center_text("1", p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=0.4, rect_h=p2_big_h*0.6)
             generate_center_text("2", p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.4, rect_h=p2_big_h*0.6)
-            frame = generate_center_logo("rotterdam.png", 100, 100, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=0.25)
-            frame = generate_center_logo("volendam.png", 100, 100, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.25)
+            frame = generate_center_logo("team/rotterdam.png", 100, 100, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=0.25)
+            frame = generate_center_logo("team/volendam.png", 100, 100, p2_x, p2_big_y, p2_end_x, p2_big_end_y, position=-0.25)
         if i > int(duration * 0.4) and i < (duration * 0.7):
             generate_rect(p2_x, player_y, p2_end_x, player_end_y)
 
@@ -334,7 +349,7 @@ while True:
             # Action performed by player
             generate_rect(p3_x, p3_big_y, end_y=p3_big_end_y, opacity=0)
             generate_center_text("Sparta Rotterdam FC", p3_x, p3_big_y, end_y=p3_big_end_y, position=-.1)
-            frame = generate_center_logo(frame, "rotterdam.png", 75, 75, p3_x, p3_big_y, end_y=p3_big_end_y, position=0.35)
+            frame = generate_center_logo(frame, "team/rotterdam.png", 75, 75, p3_x, p3_big_y, end_y=p3_big_end_y, position=0.35)
             generate_rect(p3_x, p3_big_end_y, end_y=p3_player_end_y)
             generate_center_text("Player name name name", p3_x, p3_big_end_y, end_y=p3_player_end_y, position=-.1)
             frame = generate_center_logo("football.png", 75, 75, p3_x, p3_big_end_y, end_y=p3_player_end_y, position=0.35)
@@ -350,11 +365,11 @@ while True:
             generate_rect(sc_team2_color_start, sc_y_start, sc_team2_name_end, sc_y_end, sc_color_team2) # Color
             generate_rect(sc_team2_name_end, sc_y_start, sc_team2_logo_end, sc_y_end, sc_color_black) # Logo
 
-            frame = generate_center_logo("allsvenskan.png", sc_league_logo_dim, sc_league_logo_dim, sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end)
-            frame = generate_center_logo("volendam.png", sc_team1_logo_dim, sc_team1_logo_dim, sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end)
-            frame = generate_center_logo("rotterdam.png",sc_team2_logo_dim, sc_team2_logo_dim,sc_team2_name_end, sc_y_start,sc_team2_logo_end, sc_y_end)
+            frame = generate_center_logo("league/allsvenskan.png", sc_league_logo_dim, sc_league_logo_dim, sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end)
+            frame = generate_center_logo("team/volendam.png", sc_team1_logo_dim, sc_team1_logo_dim, sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end)
+            frame = generate_center_logo("team/rotterdam.png",sc_team2_logo_dim, sc_team2_logo_dim,sc_team2_name_end, sc_y_start,sc_team2_logo_end, sc_y_end)
 
-            generate_center_text()
+             
     out.write(frame)
     
 cap.release()
