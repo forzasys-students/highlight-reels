@@ -222,7 +222,7 @@ fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
 
 style = "pakke2"
-layout = "center"
+layout = ""
 
 if style == "pakke1":
     opacity = 0.11
@@ -368,6 +368,11 @@ while True:
             frame = generate_center_logo("league/allsvenskan.png", sc_league_logo_dim, sc_league_logo_dim, sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end)
             frame = generate_center_logo("team/volendam.png", sc_team1_logo_dim, sc_team1_logo_dim, sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end)
             frame = generate_center_logo("team/rotterdam.png",sc_team2_logo_dim, sc_team2_logo_dim,sc_team2_name_end, sc_y_start,sc_team2_logo_end, sc_y_end)
+
+            generate_center_text("VOL", sc_team1_logo_end, sc_y_start, sc_team1_name_end, sc_y_end, color=sc_color_white)
+            generate_center_text("1", sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, color=sc_color_black)
+            generate_center_text("ROT", sc_team2_score_end, sc_y_start, sc_team2_name_end, sc_y_end, color=sc_color_white)
+            generate_center_text("2", sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, color=sc_color_black)
 
              
     out.write(frame)
