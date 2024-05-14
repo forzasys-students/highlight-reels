@@ -56,7 +56,7 @@ def rounded_rectangle(src, top_left, bottom_right, color, radius=1, thickness=1,
     cv2.addWeighted(overlay, opacity, src, 1 - opacity, 0, src)
     return src
 
-def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), text=[], font_scale=1, isRounded=False):
+def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), text=[], font_scale=1, isRounded=False, grow=""):
     global font_style, opacity, width, height, style, frame
     # If rectangle is centered both horiz. and vert.
     if (end_x == 1 and end_y == 1):
@@ -78,37 +78,41 @@ def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), t
         new_bottom_right = ["",""]
         new_top_left[1] = top_left[1]
         new_bottom_right[1] = bottom_right[1]
-        
-        if (end_x == 1 and end_y == 1):
-            if len(text) == 2:
-                new_top_left[0] = int(top_left[0] - text_width)
-                new_bottom_right[0] = int(bottom_right[0] + text_width)
-            else:
-                new_top_left[0] = int(top_left[0] - text_width/2)
-                new_bottom_right[0] = int(bottom_right[0] + text_width/2)
-        elif (end_y != 1):
-            if len(text) == 2:
-                new_top_left[0] = int(top_left[0] - text_width)
-                new_bottom_right[0] = int(bottom_right[0] + text_width)
-            else:
-                new_top_left[0] = int(top_left[0] - text_width/2)
-                new_bottom_right[0] = int(bottom_right[0] + text_width/2)
-        elif (end_x != 1 and end_y != 1):
-                new_top_left = top_left[0]
-                new_bottom_right[0] = int(bottom_right[0] + text_width/2)
+        if grow == "":
+            if (end_x == 1 and end_y == 1):
+                if len(text) == 2:
+                    new_top_left[0] = int(top_left[0] - text_width)
+                    new_bottom_right[0] = int(bottom_right[0] + text_width)
+                else:
+                    new_top_left[0] = int(top_left[0] - text_width/2)
+                    new_bottom_right[0] = int(bottom_right[0] + text_width/2)
+            elif (end_y != 1):
+                if len(text) == 2:
+                    new_top_left[0] = int(top_left[0] - text_width)
+                    new_bottom_right[0] = int(bottom_right[0] + text_width)
+                else:
+                    new_top_left[0] = int(top_left[0] - text_width/2)
+                    new_bottom_right[0] = int(bottom_right[0] + text_width/2)
+            elif (end_x != 1 and end_y != 1):
+                    new_top_left = top_left[0]
+                    new_bottom_right[0] = int(bottom_right[0] + text_width/2)
+        elif grow == "left":
+            new_top_left[0] = int(top_left[0] - text_width)
+            new_bottom_right[0] = bottom_right[0]
+        else:
+            new_top_left[0] = top_left[0]
+            new_bottom_right[0] = int(bottom_right[0] + text_width)
 
         top_left = tuple(new_top_left)
         bottom_right = tuple(new_bottom_right)
     
-    if style == "pakke1":
-        rounded_rectangle(frame, top_left, bottom_right, color, radius=0.1, thickness=-1, opacity=opacity)
-    elif isRounded:
+    if style == "pakke1" or isRounded:
         rounded_rectangle(frame, top_left, bottom_right, color, radius=0.1, thickness=-1, opacity=opacity)
     else:
         cv2.rectangle(frame, top_left, bottom_right, color, -1)
-    return bottom_right[1]-top_left[1] # Return height of rect for calculating font size
+    return top_left, bottom_right, bottom_right[1]-top_left[1] # Return top_left, bottom_right and height of rect.
 
-def generate_center_text(text, x_offset, y_offset, end_x=1, end_y=1, position=0, color=(0,0,0), thickness=2, rect_h=0, font_scale=1):
+def generate_center_text(text, x_offset, y_offset, end_x=1, end_y=1, position=0, color=(0,0,0), thickness=3, rect_h=0, font_scale=1):
     global font_style, frame, height, width
     
     if (end_x == 1 and end_y == 1):
@@ -265,14 +269,37 @@ if style == "pakke1":
     p3_player_end_y = 0.75
 
 if style == "pakke2":
-    # Scoreboard
+    sc_color_league = hex_to_bgr("#343434")
     sc_color_black = hex_to_bgr("#343434") # 52 52 52
     sc_color_white = hex_to_bgr("#FFFFFF")
     sc_color_team1 = hex_to_bgr("#F26617")
     sc_color_team2 = hex_to_bgr("#DD253C")
+
+    # Introduction
+    # y-offset
+    in_y_start = 0.78
+    in_y_end = 0.85
+
+    # x-offset
+    in_team1_logo_offset  = -0.04
+    in_team1_name_start = 0.45
+    in_team1_name_end = 0.46
+    in_team1_color_end = 0.47
+    
+    in_score_end = 0.53
+
+    in_team2_color_end = 0.54
+    in_team2_name_end = 0.55
+    in_team2_logo_offset = 0.04
+
+    in_league_start = 0.49
+    in_league_end = 0.51
+
+    # Scoreboard
     # y-offset
     sc_y_start = 0.055
     sc_y_end = 0.1
+    sc_y_league_end = 0.9
 
     # x-offset
     sc_team1_logo_start = 0.04
@@ -355,24 +382,69 @@ while True:
             frame = generate_center_logo("football.png", 75, 75, p3_x, p3_big_end_y, end_y=p3_player_end_y, position=0.35)
     elif style == "pakke2":
         if i > int(duration * 0.1):
+            # Scoreboard
             generate_rect(sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end, sc_color_black) # Logo
-            generate_rect(sc_team1_logo_end, sc_y_start, sc_team1_name_end, sc_y_end, sc_color_black) # Name
+            generate_rect(sc_team1_color_end, sc_y_start, sc_team1_name_end, sc_y_end, sc_color_black) # Name
             generate_rect(sc_team1_logo_end, sc_y_start, sc_team1_color_end, sc_y_end, sc_color_team1) # Color
             generate_rect(sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, sc_color_white) # Score
 
             generate_rect(sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, sc_color_white) # Score
-            generate_rect(sc_team2_score_end, sc_y_start, sc_team2_name_end, sc_y_end, sc_color_black) # Name
+            generate_rect(sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, sc_color_black) # Name
             generate_rect(sc_team2_color_start, sc_y_start, sc_team2_name_end, sc_y_end, sc_color_team2) # Color
             generate_rect(sc_team2_name_end, sc_y_start, sc_team2_logo_end, sc_y_end, sc_color_black) # Logo
-
+            
+            # Logo
             frame = generate_center_logo("league/allsvenskan.png", sc_league_logo_dim, sc_league_logo_dim, sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end)
             frame = generate_center_logo("team/volendam.png", sc_team1_logo_dim, sc_team1_logo_dim, sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end)
             frame = generate_center_logo("team/rotterdam.png",sc_team2_logo_dim, sc_team2_logo_dim,sc_team2_name_end, sc_y_start,sc_team2_logo_end, sc_y_end)
 
-            generate_center_text("VOL", sc_team1_logo_end, sc_y_start, sc_team1_name_end, sc_y_end, color=sc_color_white)
+            # Text
+            generate_center_text("VOL", sc_team1_color_end, sc_y_start, sc_team1_name_end, sc_y_end, color=sc_color_white)
             generate_center_text("1", sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, color=sc_color_black)
-            generate_center_text("ROT", sc_team2_score_end, sc_y_start, sc_team2_name_end, sc_y_end, color=sc_color_white)
+            generate_center_text("ROT", sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, color=sc_color_white)
             generate_center_text("2", sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, color=sc_color_black)
+
+            # Intro
+            name1_topleft, name1_bottomright, rect_height = generate_rect(in_team1_name_start, in_y_start, in_team1_name_end, in_y_end, sc_color_black, text=["FC Volendam", "Sparta Rotterdam"], grow="left", font_scale=0.5) # Name
+            in_team1_logo_start = (name1_topleft[0]/width)+in_team1_logo_offset
+            in_team1_logo_end = name1_topleft[0]/width
+            generate_rect(in_team1_logo_start, in_y_start, in_team1_logo_end, in_y_end, sc_color_black) # Logo
+            generate_rect(in_team1_name_end, in_y_start, in_team1_color_end, in_y_end, sc_color_team1) # Color
+            
+            generate_rect(in_team1_color_end, in_y_start, in_score_end, in_y_end, sc_color_white) # Score
+            
+            generate_rect(in_score_end, in_y_start, in_team2_color_end, in_y_end, sc_color_team2) # Color
+            name2_topleft, name2_bottomright, rect_height = generate_rect(in_team2_color_end, in_y_start, in_team2_name_end, in_y_end, sc_color_black, text=["FC Volendam", "Sparta Rotterdam"], grow="right", font_scale=0.5) # Name
+            in_team2_logo_start = name2_bottomright[0]/width
+            in_team2_logo_end = (name2_bottomright[0]/width)+in_team2_logo_offset
+            generate_rect(in_team2_logo_start, in_y_start, in_team2_logo_end, in_y_end, sc_color_black) # Logo
+
+            league_topleft, league_bottomright, rect2_height = generate_rect(in_league_start, in_y_end, in_league_end, sc_y_league_end, sc_color_black, text=["ALLSVENSKAN"], font_scale=0.5) # League
+            
+            # Logo
+            in_team_logo_dim = int((in_team2_logo_end*width - in_team2_logo_start*width)*0.9)
+            frame = generate_center_logo("team/volendam.png", in_team_logo_dim, in_team_logo_dim, in_team1_logo_start, in_y_start, in_team1_logo_end, in_y_end)
+            frame = generate_center_logo("team/rotterdam.png", in_team_logo_dim, in_team_logo_dim, in_team2_logo_start, in_y_start, in_team2_logo_end, in_y_end)
+
+            # Text
+            rect_height = rect_height*0.4
+            rect2_height = rect2_height*0.4
+            generate_center_text("FC Volendam", name1_topleft[0]/width, in_y_start, name1_bottomright[0]/width, in_y_end, rect_h=rect_height, color=sc_color_white)
+            generate_center_text("Sparta Rotterdam", name2_topleft[0]/width, in_y_start, name2_bottomright[0]/width, in_y_end, rect_h=rect_height, color=sc_color_white)
+            generate_center_text("1-2", in_team1_color_end, in_y_start, in_score_end, in_y_end, color=sc_color_black, rect_h=rect_height)
+            generate_center_text("ALLSVENSKAN", league_topleft[0]/width, in_y_end, league_bottomright[0]/width, sc_y_league_end, color=sc_color_white, rect_h=rect2_height,)
+
+
+
+           
+
+
+
+
+
+
+
+
 
              
     out.write(frame)

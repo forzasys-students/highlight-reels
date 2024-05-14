@@ -428,14 +428,13 @@ def path_graphic(graphic_file):
     return json_file_path
 
 # Edit color config of main_template.json
-def modify_graphic(color_config, hex_color):
-    
+def modify_graphic(setting, value):
     json_file_path = path_graphic('main_template.json')
 
     with open(json_file_path, 'r') as file:
         data = json.load(file)
-
-    data["custom_template"][color_config] = hex_color
+    
+    data["general_settings"][setting] = value
     
     with open(json_file_path, 'w') as file:
         json.dump(data, file, indent=4)
@@ -453,6 +452,8 @@ def modify_config(config_file, type, value, index=0):
         data['clips'][index]['clip_meta'][0][type] = value
     elif(type == 'platform' or type == 'aspect_ratio'):
         data['encoding_parameters'][type] = value
+    elif(type == 'layout'):
+        data[]
 
     with open(json_file_path, 'w') as file:
         json.dump(data, file, indent=4)
@@ -515,13 +516,33 @@ def user_options():
 
     while True:
         orientation = ''
-        print("Choose the layout (default: left): \n1. Left\n2. Middle")
+        setting = "graphic_layout"
+        print("Choose the layout (default: left): \n1. Left\n2. Center")
         choice = input("Enter your choice (1/2): ")
 
         if choice == '1' or choice == 'left':
             orientation = 'left'
-        elif choice == '2' or choice == 'middle':
-            orientation = 'middle'
+            modify_graphic(setting, orientation)
+        elif choice == '2' or choice == 'center':
+            orientation = 'center'
+            modify_graphic(setting, orientation)
+        else:
+            print(f"Error resolving input '{choice}'")
+            continue
+        break
+
+    while True:
+        graphic_pack = ''
+        setting = "template"
+        print("Choose a graphic pack (default: Rectangle): \n1. Rectangle\n2. Diamond")
+        choice = input("Enter your choice (1/2): ")
+
+        if choice == '1' or choice == 'rectangle':
+            graphic_pack = 'rectangle'
+            modify_graphic(setting, graphic_pack)
+        elif choice == '2' or choice == 'diamond':
+            graphic_pack = 'diamond'
+            modify_graphic(setting, graphic_pack)
         else:
             print(f"Error resolving input '{choice}'")
             continue
@@ -575,8 +596,48 @@ def user_options():
                         break
             # Select a league and the league's color theme
             while True:                
-                
-
+                setting = 'graphic_template'
+                print("Choose a league or a color-theme (default: J1 League): \n1. J1 League\n2. Eredivisie\n3. Allsvenskan\n4. Red\n5. Green\n6. En eller annen farge")
+                choice = input("Enter your choice (1/2/3/4/5/6): ")
+                if choice == '1':
+                    modify_config(config, setting, 'j1_league')
+                elif choice == '2':
+                    modify_config(config, setting, 'eredivisie')
+                elif choice == '3':
+                    modify_config(config, setting, 'allsvenskan')
+                elif choice == '4':
+                    modify_config(config, setting, 'red')
+                elif choice == '5':
+                    modify_config(config, setting, 'green') 
+                elif choice == '6':
+                    modify_config(config, setting, 'purple')
+                else:
+                    print(f"Error resolving input '{choice}'")
+                    continue
+                break
+            # Select home team and visiting team
+            while True:
+                setting = "home_color"
+                print("Choose the home team (default: FC Tokyo): \n1. FC Tokyo\n2. Kashima Antlers\n3. Urawa Red Diamond\n4. Tokyo Verdy\n5. PSV Eindhoven\n6. Fortuna Sittard\n7. FC Volendam\n8. Sparta Rotterdam")
+                choice = input("Enter your choice (1/2/3/4/5/6): ")
+                if choice == '1':
+                    modify_config(config, setting, 'j1_league')
+                elif choice == '2':
+                    modify_config(config, setting, 'eredivisie')
+                elif choice == '3':
+                    modify_config(config, setting, 'allsvenskan')
+                elif choice == '4':
+                    modify_config(config, setting, 'red')
+                elif choice == '5':
+                    modify_config(config, setting, 'green') 
+                elif choice == '6':
+                    modify_config(config, setting, 'purple')
+                elif choice == '7':
+                    modify_config(config, setting, 'purple')
+                elif choice == '8':
+            while True:
+                setting = "visiting_color"
+                print("Choose a ")
         elif choice == 'no' or choice == 'n':
             break
         else:
