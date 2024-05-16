@@ -399,9 +399,9 @@ while True:
             frame = generate_center_logo("team/rotterdam.png",sc_team2_logo_dim, sc_team2_logo_dim,sc_team2_name_end, sc_y_start,sc_team2_logo_end, sc_y_end)
 
             # Text
-            generate_center_text("VOL", sc_team1_color_end, sc_y_start, sc_team1_name_end, sc_y_end, color=sc_color_white)
+            generate_center_text("URAW", sc_team1_color_end, sc_y_start, sc_team1_name_end, sc_y_end, color=sc_color_white, font_scale=0.8, thickness=2)
             generate_center_text("1", sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, color=sc_color_black)
-            generate_center_text("ROT", sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, color=sc_color_white)
+            generate_center_text("ROT", sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, color=sc_color_white, font_scale=0.8, thickness=2)
             generate_center_text("2", sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, color=sc_color_black)
 
             # Intro

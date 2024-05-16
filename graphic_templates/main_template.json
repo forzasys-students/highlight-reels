@@ -1,38 +1,42 @@
 {
-    "red_template": {
-        "fg_color": "red i hex",
-        "bg_color": "noe red i hex",
-        "border_color": "noe border color i hex",
-        "text_color": "noe hvit i hex",
-        "template": {
-            "name": "ForzaSys"
-        }
+    "general_settings": {
+        "graphic_layout": "left",
+        "home_color": [
+            "#002B67",
+            "#FF0B33"
+        ],
+        "visiting_color": [
+            {
+                "color_1": ""
+            },
+            {
+                "color_2": ""
+            }
+        ],
+        "template": "rectangle"
     },
-    "orange_template": {
-        "fg_color": "oransj i hex",
-        "bg_color": "noe oransj i hex",
-        "border_color": "noe border color i hex",
-        "text_color": "noe hvit i hex",
-        "template": {
-            "name": "ForzaSys"
-        }
+    "j1_league": {
+        "fg_color": "",
+        "bg_color": "#343434",
+        "border_color": "",
+        "text_color": "#FFFFFF"
     },
-    "yellow_template": {
-        "fg_color": "yellow i hex",
-        "bg_color": "noe yellow i hex",
-        "border_color": "noe border color i hex",
-        "text_color": "noe hvit i hex",
-        "template": {
-            "name": "ForzaSys"
-        }
+    "eredivisie": {
+        "fg_color": "",
+        "bg_color": "#262261",
+        "border_color": "",
+        "text_color": "#FFFFFF"
     },
-    "custom_template": {
+    "allsvenskan": {
+        "fg_color": "",
+        "bg_color": "#15336E",
+        "border_color": "",
+        "text_color": "#FFFFFF"
+    },
+    "red": {
         "fg_color": "#111111",
         "bg_color": "#023047",
         "border_color": "#219ebc",
-        "text_color": "#FFFFFF",
-        "template": {
-            "name": "ForzaSys"
-        }
+        "text_color": "#FFFFFF"
     }
 }

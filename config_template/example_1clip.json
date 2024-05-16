@@ -15,7 +15,7 @@
     "clip_parameters": {
         "clip_transitions": false,
         "clip_graphic_template": {
-            "graphic_template": "red_template"
+            "graphic_template": "j1_league"
         }
     },
     "destinations": {
@@ -38,7 +38,7 @@
                     "visiting_team_goals": "4",
                     "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
                     "player_name": "Mikael Mikaelson",
-                    "action": "shot",
+                    "action": "goal",
                     "score": "0-0",
                     "phase": "1st half"
                 }

@@ -434,6 +434,10 @@ def modify_graphic(setting, value):
     with open(json_file_path, 'r') as file:
         data = json.load(file)
     
+    if setting == 'home_color' or setting == 'visiting_color':
+        for i in range(len(value)):
+            data["general_settings"][setting][i]= value[i]
+
     data["general_settings"][setting] = value
     
     with open(json_file_path, 'w') as file:
@@ -452,8 +456,7 @@ def modify_config(config_file, type, value, index=0):
         data['clips'][index]['clip_meta'][0][type] = value
     elif(type == 'platform' or type == 'aspect_ratio'):
         data['encoding_parameters'][type] = value
-    elif(type == 'layout'):
-        data[]
+    
 
     with open(json_file_path, 'w') as file:
         json.dump(data, file, indent=4)
@@ -617,27 +620,107 @@ def user_options():
                 break
             # Select home team and visiting team
             while True:
-                setting = "home_color"
+                home_n = "home_name"
+                home_i = "home_initials"
+                home_c = "home_color"
+                home_url = "home_logo_url"
                 print("Choose the home team (default: FC Tokyo): \n1. FC Tokyo\n2. Kashima Antlers\n3. Urawa Red Diamond\n4. Tokyo Verdy\n5. PSV Eindhoven\n6. Fortuna Sittard\n7. FC Volendam\n8. Sparta Rotterdam")
                 choice = input("Enter your choice (1/2/3/4/5/6): ")
                 if choice == '1':
-                    modify_config(config, setting, 'j1_league')
+                    modify_config(config, home_n, 'FC Tokyo') # Changes name of home team 
+                    modify_config(config, home_i, 'FCT') # Changes the initials for the home team
+                    modify_graphic(home_c, ["#002B67","#FF0B33"]) # Changes the team's colors according to jersey
+                    modify_config(config, home_url, "team/tokyo.png") # Changes local url to team's logo
                 elif choice == '2':
-                    modify_config(config, setting, 'eredivisie')
+                    modify_config(config, home_n, 'Kashima Antlers')
+                    modify_config(config, home_i, 'KASM')
+                    modify_graphic(home_c, ["#ffffff","#ffffff"])
+                    modify_config(config, home_url, "team/kashima.png")
                 elif choice == '3':
-                    modify_config(config, setting, 'allsvenskan')
+                    modify_config(config, home_n, 'Urawa Red Diamond')
+                    modify_config(config, home_i, 'URAW')
+                    modify_graphic(home_c, ["#ffffff","#CFCED2"])
+                    modify_config(config, home_url, "team/urawa.png")
                 elif choice == '4':
-                    modify_config(config, setting, 'red')
+                    modify_config(config, home_n, 'Tokyo Verdy')
+                    modify_config(config, home_i, 'TK-V')
+                    modify_graphic(home_c, ["#ffffff","#ffffff"])
+                    modify_config(config, home_url, "team/tokyoverdy.png")
                 elif choice == '5':
-                    modify_config(config, setting, 'green') 
+                    modify_config(config, home_n, 'PSV Eindhoven') 
+                    modify_config(config, home_i, 'PSV')
+                    modify_graphic(home_c, ["#ffffff","#ED1C24"])
+                    modify_config(config, home_url, "team/psv.png")
                 elif choice == '6':
-                    modify_config(config, setting, 'purple')
+                    modify_config(config, home_n, 'Fortuna Sittard')
+                    modify_config(config, home_i, 'FOR')
+                    modify_graphic(home_c, ["#000000","#000000"])
+                    modify_config(config, home_url, "team/fortuna.png")
                 elif choice == '7':
-                    modify_config(config, setting, 'purple')
+                    modify_config(config, home_n, 'FC Volendam')
+                    modify_config(config, home_i, 'VOL')
+                    modify_graphic(home_c, ["#ee7f00","#ffffff"])
+                    modify_config(config, home_url, "team/volendam.png")
                 elif choice == '8':
+                    modify_config(config, home_n, 'Sparta Rotterdam')
+                    modify_config(config, home_i, 'SPA')
+                    modify_graphic(home_c, ["#466173","#466173"])
+                    modify_config(config, home_url, "team/rotterdam.png")
+                else:
+                    print(f"Error resolving input '{choice}'")
+                    continue
+                break
             while True:
-                setting = "visiting_color"
-                print("Choose a ")
+                visiting_n = "visiting_name"
+                visiting_i = "visiting_initials"
+                visiting_c = "visiting_color"
+                visiting_url = "visiting_logo_url"
+                print("Choose the home team (default: FC Tokyo): \n1. FC Tokyo\n2. Kashima Antlers\n3. Urawa Red Diamond\n4. Tokyo Verdy\n5. PSV Eindhoven\n6. Fortuna Sittard\n7. FC Volendam\n8. Sparta Rotterdam")
+                choice = input("Enter your choice (1/2/3/4/5/6): ")
+                if choice == '1':
+                    modify_config(config, home_n, 'FC Tokyo')
+                    modify_config(config, home_i, 'FCT')
+                    modify_graphic(home_c, ["#002B67","#FF0B33"])
+                    modify_config(config, home_url, "team/tokyo.png") # Changes local url to team's logo
+                elif choice == '2':
+                    modify_config(config, home_n, 'Kashima Antlers')
+                    modify_config(config, home_i, 'KASM')
+                    modify_graphic(home_c, ["#ffffff","#ffffff"])
+                    modify_config(config, home_url, "team/kashima.png")
+                elif choice == '3':
+                    modify_config(config, home_n, 'Urawa Red Diamond')
+                    modify_config(config, home_i, 'URAW')
+                    modify_graphic(home_c, ["#ffffff","#CFCED2"])
+                    modify_config(config, home_url, "team/urawa.png")
+                elif choice == '4':
+                    modify_config(config, home_n, 'Tokyo Verdy')
+                    modify_config(config, home_i, 'TK-V')
+                    modify_graphic(home_c, ["#ffffff","#ffffff"])
+                    modify_config(config, home_url, "team/tokyoverdy.png")
+                elif choice == '5':
+                    modify_config(config, home_n, 'PSV Eindhoven') 
+                    modify_config(config, home_i, 'PSV')
+                    modify_graphic(home_c, ["#ffffff","#ED1C24"])
+                    modify_config(config, home_url, "team/psv.png")
+                elif choice == '6':
+                    modify_config(config, home_n, 'Fortuna Sittard')
+                    modify_config(config, home_i, 'FOR')
+                    modify_graphic(home_c, ["#000000","#000000"])
+                    modify_config(config, home_url, "team/fortuna.png")
+                elif choice == '7':
+                    modify_config(config, home_n, 'FC Volendam')
+                    modify_config(config, home_i, 'VOL')
+                    modify_graphic(home_c, ["#ee7f00","#ffffff"])
+                    modify_config(config, home_url, "team/volendam.png")
+                elif choice == '8':
+                    modify_config(config, home_n, 'Sparta Rotterdam')
+                    modify_config(config, home_i, 'SPA')
+                    modify_graphic(home_c, ["#466173","#466173"])
+                    modify_config(config, home_url, "team/rotterdam.png")
+                else:
+                    print(f"Error resolving input '{choice}'")
+                    continue
+                break
         elif choice == 'no' or choice == 'n':
             break
         else:
