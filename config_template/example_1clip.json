@@ -1,5 +1,5 @@
 {
-    "name": "allsvenskan",
+    "name": "1clip_config",
     "encoding_parameters": {
         "height": 1920,
         "width": 1080,
@@ -25,18 +25,19 @@
     },
     "clips": [
         {
-            "video_url": "https://demo-api.forzify.com/nld/playlist.m3u8/15:1861000:1871000/Manifest.m3u8",
+            "video_url": "resources/clips/clip_1_16_9.mp4",
             "clip_meta": [
                 {
-                    "home_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/FC_Volendam-FC_Volendam_logo.svg.png",
-                    "home_name": "FC Volendam",
+                    "home_logo_url": "team/kashima.png",
+                    "home_name": "Kashima Antlers",
                     "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
                     "visiting_name": "Sparta Rotterdam",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
-                    "league_logo_url": "https://forzifyweb-se.s3.eu-north-1.amazonaws.com/team_logos/allsvenskan.png",
+                    "league_logo_url": "league/j1.png",
+                    "league_name": "J1 League",
                     "player_name": "Mikael Mikaelson",
                     "action": "goal",
                     "score": "0-0",

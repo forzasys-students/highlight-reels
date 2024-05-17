@@ -28,10 +28,10 @@ import time
 def run_and_log(cmd: [] or str, msg: str = None, shell: bool = False):
     try:
         t_start = time.monotonic()
-        # log.info(f'[reels] Cmd to run ({msg}): {" ".join(cmd) if isinstance(cmd, list) else cmd}')
+        print(f'[reels] Cmd to run ({msg}): {" ".join(cmd) if isinstance(cmd, list) else cmd}')
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell)
         stdout, stderr = process.communicate()
-        return_code = process.returncode()
+        return_code = process.returncode
 
         cmd_dur = time.monotonic() - t_start
 
