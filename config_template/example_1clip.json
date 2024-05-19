@@ -28,10 +28,12 @@
             "video_url": "resources/clips/clip_1_16_9.mp4",
             "clip_meta": [
                 {
-                    "home_logo_url": "team/kashima.png",
-                    "home_name": "Kashima Antlers",
-                    "visiting_logo_url": "https://cdn.forzasys.com/team-logos/forzify-backend-demo/Sparta_Rotterdam-Sparta_Rotterdam_logo.svg.png",
-                    "visiting_name": "Sparta Rotterdam",
+                    "home_logo_url": "team/tokyo.png",
+                    "home_name": "FC Tokyo",
+                    "home_initials": "FCT",
+                    "visiting_logo_url": "team/kashima.png",
+                    "visiting_name": "Kashima Antlers",
+                    "visiting_initials": "KASM",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
@@ -40,8 +42,9 @@
                     "league_name": "J1 League",
                     "player_name": "Mikael Mikaelson",
                     "action": "goal",
-                    "score": "0-0",
-                    "phase": "1st half"
+                    "score": "2-1",
+                    "phase": "1st half",
+                    "time": "12:34"
                 }
             ]
         }

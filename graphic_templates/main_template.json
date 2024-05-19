@@ -3,11 +3,11 @@
         "graphic_layout": "left",
         "home_color": [
             "#ffffff",
-            "#ffffff"
+            "#CFCED2"
         ],
         "visiting_color": [
             "#ffffff",
-            "#ED1C24"
+            "#ffffff"
         ],
         "template": "rectangle"
     },

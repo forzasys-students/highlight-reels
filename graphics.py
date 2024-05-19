@@ -4,7 +4,7 @@ import cv2
 import time
 import logging
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageColor
 from urllib.parse import urlparse
 from utils import run_and_log
 
@@ -39,6 +39,8 @@ class GraphicsTemplate:
         fps = self.clip.frame_rate()
         home_color = graphic_settings.get('home_color')
         visiting_color = graphic_settings.get('visiting_color')
+        graphic_template = graphic_settings.get('template')
+        graphic_layout = graphic_settings.get('graphic_layout')
 
         generate_meta = False
         for meta in self.clip.config['clip_meta']:
@@ -49,11 +51,201 @@ class GraphicsTemplate:
         if not generate_meta:
             return
         
-        create_animated_meta(video_h, video_w, self.clip.config['clip_meta'], self.bg_color, self.text_color, home_color, visiting_color, self.clip.local_file_name, clip_num, self.clip.aspect_ratio)
+        create_animated_meta(video_h, video_w, self.clip.config['clip_meta'], self.bg_color, self.text_color, home_color, visiting_color, self.clip.local_file_name, clip_num, graphic_template, graphic_layout, self.clip.aspect_ratio)
         
         print(f'Adding graphic overlay took: {time.perf_counter() - tpc}')
         
+def rounded_rectangle(src, top_left, bottom_right, color, radius=1, thickness=1, opacity=1, line_type=cv2.LINE_AA):
+    overlay = src.copy()
+    #  corners:
+    #  p1 - p2
+    #  |     |
+    #  p4 - p3
+
+    p1 = top_left
+    p2 = (bottom_right[0], top_left[1])
+    p3 = (bottom_right[0], bottom_right[1])
+    p4 = (top_left[0], bottom_right[1])
+
+    height = abs(bottom_right[1] - top_left[1])
+
+    if radius > 1:
+        radius = 1
+
+    corner_radius = int(radius * (height/2))
+
+    if thickness < 0:
+
+        #big rect
+        top_left_main_rect = (int(p1[0] + corner_radius), int(p1[1]))
+        bottom_right_main_rect = (int(p3[0] - corner_radius), int(p3[1]))
+
+        top_left_rect_left = (p1[0], p1[1] + corner_radius)
+        bottom_right_rect_left = (p4[0] + corner_radius, p4[1] - corner_radius)
+
+        top_left_rect_right = (p2[0] - corner_radius, p2[1] + corner_radius)
+        bottom_right_rect_right = (p3[0], p3[1] - corner_radius)
+
+        all_rects = [
+        [top_left_main_rect, bottom_right_main_rect], 
+        [top_left_rect_left, bottom_right_rect_left], 
+        [top_left_rect_right, bottom_right_rect_right]]
+
+        [cv2.rectangle(src, rect[0], rect[1], color, thickness) for rect in all_rects]
+
+    # draw straight lines
+    cv2.line(src, (p1[0] + corner_radius, p1[1]), (p2[0] - corner_radius, p2[1]), color, abs(thickness), line_type)
+    cv2.line(src, (p2[0], p2[1] + corner_radius), (p3[0], p3[1] - corner_radius), color, abs(thickness), line_type)
+    cv2.line(src, (p3[0] - corner_radius, p4[1]), (p4[0] + corner_radius, p3[1]), color, abs(thickness), line_type)
+    cv2.line(src, (p4[0], p4[1] - corner_radius), (p1[0], p1[1] + corner_radius), color, abs(thickness), line_type)
+
+    # draw arcs
+    cv2.ellipse(src, (p1[0] + corner_radius, p1[1] + corner_radius), (corner_radius, corner_radius), 180.0, 0, 90, color ,thickness, line_type)
+    cv2.ellipse(src, (p2[0] - corner_radius, p2[1] + corner_radius), (corner_radius, corner_radius), 270.0, 0, 90, color , thickness, line_type)
+    cv2.ellipse(src, (p3[0] - corner_radius, p3[1] - corner_radius), (corner_radius, corner_radius), 0.0, 0, 90,   color , thickness, line_type)
+    cv2.ellipse(src, (p4[0] + corner_radius, p4[1] - corner_radius), (corner_radius, corner_radius), 90.0, 0, 90,  color , thickness, line_type)
+
+    cv2.addWeighted(overlay, opacity, src, 1 - opacity, 0, src)
+    return src        
+
+def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), text=[], font_scale=1, isRounded=False, grow=""):
+    global font_style, opacity, width, height, style, frame
+    # If rectangle is centered both horiz. and vert.
+    if (end_x == 1 and end_y == 1):
+        top_left = int(width * x_offset), int(height * y_offset)
+        bottom_right = (int(width - top_left[0]), int(height - top_left[1]))
+    # If rectangle is offcenter both horiz. and vert.
+    elif (end_x != 1 and end_y != 1):
         
+        top_left = int(width * x_offset), int(height * y_offset)
+        bottom_right = (int(width * end_x), int(height * end_y))
+    # If rectangle is centered only horizontally
+    elif (end_y != 1):
+        top_left = (int(width * x_offset), int(height * y_offset))
+        bottom_right = (int(width - top_left[0]), int(height * end_y))
+
+    if text:
+        text_size = cv2.getTextSize(max(text, key=len), font_style, ((bottom_right[1]-top_left[1])*font_scale)/22, 2)
+        text_width = int(text_size[0][0])
+        new_top_left = ["",""] 
+        new_bottom_right = ["",""]
+        new_top_left[1] = top_left[1]
+        new_bottom_right[1] = bottom_right[1]
+        if grow == "":
+            if (end_x == 1 and end_y == 1):
+                if len(text) == 2:
+                    new_top_left[0] = int(top_left[0] - text_width)
+                    new_bottom_right[0] = int(bottom_right[0] + text_width)
+                else:
+                    new_top_left[0] = int(top_left[0] - text_width/2)
+                    new_bottom_right[0] = int(bottom_right[0] + text_width/2)
+            elif (end_y != 1):
+                if len(text) == 2:
+                    new_top_left[0] = int(top_left[0] - text_width)
+                    new_bottom_right[0] = int(bottom_right[0] + text_width)
+                else:
+                    new_top_left[0] = int(top_left[0] - text_width/2)
+                    new_bottom_right[0] = int(bottom_right[0] + text_width/2)
+            elif (end_x != 1 and end_y != 1):
+                    new_top_left = top_left[0]
+                    new_bottom_right[0] = int(bottom_right[0] + text_width/2)
+        elif grow == "left":
+            new_top_left[0] = int(top_left[0] - text_width)
+            new_bottom_right[0] = bottom_right[0]
+        else:
+            new_top_left[0] = top_left[0]
+            new_bottom_right[0] = int(bottom_right[0] + text_width)
+
+        top_left = tuple(new_top_left)
+        bottom_right = tuple(new_bottom_right)
+    
+    if isRounded:
+        rounded_rectangle(frame, top_left, bottom_right, color, radius=0.1, thickness=-1, opacity=opacity)
+    else:
+        cv2.rectangle(frame, top_left, bottom_right, color, -1)
+    return top_left, bottom_right, bottom_right[1]-top_left[1] # Return top_left, bottom_right and height of rect.
+
+def generate_center_text(text, x_offset, y_offset, end_x=1, end_y=1, position=0, color=(0,0,0), thickness=3, rect_h=0, font_scale=1):
+    global font_style, frame, height, width
+    
+    if (end_x == 1 and end_y == 1):
+        center_w = int(width / 2)
+        center_h = int(height / 2)
+        if position != 0:
+            w_offset = int((width - 2*(x_offset*width))*position)
+            center_w = center_w - w_offset
+    elif (end_x != 1 and end_y != 1):
+        center_w = int(width*x_offset + ((width*end_x - width*x_offset)/2))
+        center_h = int(height*y_offset + ((height*end_y - height*y_offset)/2))
+        if position != 0:
+            w_offset = int((width*end_x - width*x_offset)*position)
+            center_w = center_w - w_offset
+    elif (end_y != 1):
+        center_w = int(width / 2)
+        center_h = int(height*y_offset + ((height*end_y - height*y_offset)/2))
+        if position != 0:
+            w_offset = int((width - 2*(x_offset*width))*position)
+            center_w = center_w - w_offset
+    
+    if rect_h != 0:
+        font_scale = (rect_h)/22 # Scale the font, 22 meaning the standard size of the font in pixels
+    else:
+        font_scale = font_scale
+    
+    text_size, _ = cv2.getTextSize(text, font_style, font_scale, thickness)
+    
+    text_origin = (int(center_w - text_size[0] / 2), int(center_h + text_size[1] / 2))
+
+    cv2.putText(frame, text, (text_origin[0], text_origin[1]), font_style, font_scale, color, thickness, cv2.LINE_AA)
+
+def generate_center_logo(logo, logo_w, logo_h, x_offset, y_offset, end_x=1, end_y=1, position=0, keepRatio=False):
+    global width, height, frame
+    if (end_x == 1 and end_y == 1):
+        center_w = int(width / 2)
+        center_h = int(height / 2)
+        if position != 0:
+            w_offset = int((width - 2*(x_offset*width))*position)
+            center_w = center_w - w_offset
+    elif (end_x != 1 and end_y != 1):
+        center_w = int(width*x_offset + ((width*end_x - width*x_offset)/2))
+        center_h = int(height*y_offset + ((height*end_y - height*y_offset)/2))
+        if position != 0:
+            w_offset = int((width*end_x - width*x_offset)*position)
+            center_w = center_w - w_offset
+    elif (end_y != 1):
+        center_w = int(width / 2)
+        center_h = int(height*y_offset + ((height*end_y - height*y_offset)/2))
+        if position != 0:
+            w_offset = int((width - 2*(x_offset*width))*position)
+            center_w = center_w - w_offset
+
+    if not is_image(logo):
+        logo = Image.open(f"resources/img/{logo}")
+        
+    new_size = (logo_w, logo_h)
+
+    if keepRatio:
+        # Not working, ValueError: use 4-item box
+        resized_image = logo.thumbnail((new_size)) 
+    else:
+        resized_image = logo.resize(new_size)
+
+    logo_origin = (int(center_w - new_size[0] / 2), int(center_h - new_size[1] / 2))
+
+    # Convert cv2 image to PIL image for "paste()"
+    frame_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    frame_copy = frame_pil.copy()
+
+    frame_copy.paste(resized_image, (logo_origin[0], logo_origin[1]), resized_image)
+
+    # Convert PIL image back to cv2 image
+    frame = cv2.cvtColor(np.array(frame_copy), cv2.COLOR_RGB2BGR)
+
+    return frame
+
+def is_image(var):
+    return isinstance(var, Image.Image)
+
 
 def get_img(url: str) -> Image or None:
     response = requests.get(url)
@@ -74,7 +266,7 @@ def get_img(url: str) -> Image or None:
         return out
 
 def get_img_local(image_name):
-    folder_path = 'images'
+    folder_path = 'resources/img'
     image_path = os.path.join(folder_path, image_name)
 
     with Image.open(image_path) as img:
@@ -82,46 +274,49 @@ def get_img_local(image_name):
     
     return out
 
-def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home_color, visiting_color, local_file_name, clip_num, aspect_ratio=[16, 9], fps=25.0):
-    for i, meta in enumerate(clip_meta):
-        home_logo_url = meta['home_logo_url']
-        visiting_logo_url = meta['visiting_logo_url']
-        league_logo_url = meta['league_logo_url']
+def hex_to_bgr(hex):
+    rgb = list(ImageColor.getcolor(hex, "RGB"))
+    rgb[0], rgb[-1] = rgb[-1], rgb[0]
+    bgr = tuple(rgb)
+    return bgr
 
-        # Dynamic sizes
-        if aspect_ratio == [16, 9] or aspect_ratio is None:
-            aspect_ratio = [16, 9]
-            logo_box_dim_ratio = 0.35
-            logo_dim_ratio = 0.2
-            msg_font_size = 25
-            icon_dim_ratio = 0.15
-            overlay_postion_y_offset = 0.92
-            overlay_postion_x_offset = 0.05
-        elif aspect_ratio == [9, 16]:
-            logo_box_dim_ratio = 0.15
-            logo_dim_ratio = 0.14
-            msg_font_size = 18
-            icon_dim_ratio = 0.1
-            overlay_postion_y_offset = 0.92
-            overlay_postion_x_offset = 0.1
-        elif aspect_ratio == [1, 1]:
-            logo_box_dim_ratio = 0.22
-            logo_dim_ratio = 0.16
-            msg_font_size = 23
-            icon_dim_ratio = 0.11
-            overlay_postion_y_offset = 0.92
-            overlay_postion_x_offset = 0.1
-        elif aspect_ratio == [4, 5]:
-            logo_box_dim_ratio = 0.22
-            league_logo_dim_ratio = 0.16
-            msg_font_size = 23
-            icon_dim_ratio = 0.11
-            overlay_postion_y_offset = 0.92
-            overlay_postion_x_offset = 0.1
+def get_action_message_and_icon(meta, language='EN'): 
+    team_logo_url = meta['home_logo_url']
+    score = meta['score']
+    player_name = meta['player_name']
+
+    if language == 'EN':
+        if meta['action'] == 'shot':
+            icon = get_img_local('icons/shot_icon.png')
+            msg = 'Shot at goal'
+        elif meta['action'] == 'goal':
+            icon = get_img_local(team_logo_url)
+            msg = 'Goal'
+        elif meta['action'] == 'yellow card':
+            icon = get_img_local('yellow_icon.png')
+            msg = 'Yellow card'
+        elif meta['action'] == 'red card':
+            icon = get_img_local('red_icon.png')
+            msg = 'Red card'
+        elif meta['action'] == 'penalty':
+            icon = get_img_local(team_logo_url)
         else:
-            raise ValueError(f'Invalid aspect ratio entered: {aspect_ratio}.')
-        
-        
+            icon = get_img_local('ball_icon.png')
+            msg = 'Missing action'
+
+        if player_name:
+            msg = f'{player_name}: {msg}'
+
+        return icon, msg
+    
+width = 1920
+height = 1080
+frame = np.zeros((height, width, 3), dtype=np.uint8)
+font_style = cv2.FONT_HERSHEY_SIMPLEX
+
+def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home_color, visiting_color, local_file_name, clip_num, graphic_template, graphic_layout, aspect_ratio=[16, 9], fps=25.0):
+    global frame, width, height, font_style
+    for i, meta in enumerate(clip_meta):
         # Initialize video capture 
         cap = cv2.VideoCapture(local_file_name)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -138,6 +333,103 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
 
         out = cv2.VideoWriter(output_filename, fourcc, fps, (width, height))
         
+        home_logo_url = meta['home_logo_url']
+        home_name = meta['home_name']
+        home_ini = meta['home_initials']
+        home_color1 = hex_to_bgr(home_color[0])
+        home_color2 = hex_to_bgr(home_color[1])
+        visiting_logo_url = meta['visiting_logo_url']
+        visiting_name = meta['visiting_name']
+        visiting_ini = meta['visiting_initials']
+        visiting_color1 = hex_to_bgr(visiting_color[0])
+        visiting_color2 = hex_to_bgr(visiting_color[1])
+        league_logo_url = meta['league_logo_url']
+        icon, msg = get_action_message_and_icon(meta)
+        score = meta['score']
+        game_time = meta['time']
+
+        # Dynamic sizes
+        if aspect_ratio == [16, 9] or aspect_ratio is None:
+            if graphic_template == 'rectangle':
+                aspect_ratio = [16, 9]
+                
+                bg_color_graphic = hex_to_bgr(bg_color) # 52 52 52
+                bg_color_white = hex_to_bgr("#FFFFFF")
+                
+
+                # Introduction
+                # y-offset
+                in_y_start = 0.78
+                in_y_end = 0.85
+
+                # x-offset
+                in_team1_logo_offset  = -0.04
+                in_team1_name_start = 0.45
+                in_team1_name_end = 0.46
+                in_team1_color_end = 0.47
+                
+                in_score_end = 0.53
+
+                in_team2_color_end = 0.54
+                in_team2_name_end = 0.55
+                in_team2_logo_offset = 0.04
+
+                in_league_start = 0.49
+                in_league_end = 0.51
+
+                # Scoreboard
+                # y-offset
+                sc_y_start = 0.055
+                sc_y_end = 0.1
+                sc_y_league_end = 0.9
+
+                # x-offset
+                sc_team1_logo_start = 0.04
+                sc_team1_logo_end = 0.065 #0.025
+                sc_team1_color_end = 0.068
+                sc_team1_name_end = 0.113
+                sc_team1_score_end = 0.137
+
+                sc_team2_score_start = 0.198
+                sc_team2_score_end = 0.223
+                sc_team2_name_end = 0.271
+                sc_team2_color_start = 0.268
+                sc_team2_logo_end = 0.295
+
+                # Icons !! Aspect ratio is not kept !!
+                if "j1" in league_logo_url or "allsvenskan" in league_logo_url:
+                    league_height = int(0.2*height - 0.125*height)
+                    league_width = int(0.2*width - 0.16*width)
+                else:
+                    league_height = int(0.2*width - 0.16*width)
+                    league_width = int(0.2*width - 0.16*width)
+                
+                sc_team1_logo_dim = int((sc_team1_logo_end*width - sc_team1_logo_start*width)*0.9)
+                sc_team2_logo_dim = int((sc_team1_logo_end*width - sc_team1_logo_start*width)*0.9)
+
+                if graphic_layout == "center":
+                    sc_middle_offset = 0.332
+                    sc_team1_logo_start += sc_middle_offset
+                    sc_team1_logo_end += sc_middle_offset
+                    sc_team1_color_end +=sc_middle_offset
+                    sc_team1_name_end += sc_middle_offset
+                    sc_team1_score_end +=sc_middle_offset
+
+                    sc_team2_score_start += sc_middle_offset
+                    sc_team2_score_end +=sc_middle_offset
+                    sc_team2_name_end +=  sc_middle_offset
+                    sc_team2_color_start +=sc_middle_offset
+                    sc_team2_logo_end +=  sc_middle_offset
+
+        elif aspect_ratio == [9, 16]:
+            logo_box_dim_ratio = 0.15
+            logo_dim_ratio = 0.14
+            msg_font_size = 18
+            icon_dim_ratio = 0.1
+            overlay_postion_y_offset = 0.92
+            overlay_postion_x_offset = 0.1
+        else:
+            raise ValueError(f'Invalid aspect ratio entered: {aspect_ratio}.')
         
         i = 1
         while True:
@@ -145,13 +437,72 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
             if not ret:
                 break
             i += 1
-
             
             # Fade-in effect team logo
-            if i < int(duration * 0.1):
-                cv2.rectangle(frame, (100, 100), (200,200), (255,255,255), -1)
-                if (clip_num == 1):
-                    cv2.rectangle(frame, (100, 100), (200,200), (0,0,0), -1)
+            if i <= int(duration):
+                generate_rect(sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end, bg_color_graphic) # Logo
+                generate_rect(sc_team1_color_end, sc_y_start, sc_team1_name_end, sc_y_end, bg_color_graphic) # Name
+                generate_rect(sc_team1_logo_end, sc_y_start, sc_team1_color_end, sc_y_end - (sc_y_end - sc_y_start), home_color1) # Color1
+                generate_rect(sc_team1_logo_end, sc_y_end - (sc_y_end - sc_y_start), sc_team1_color_end, sc_y_end - (sc_y_end - sc_y_start), home_color2) # Color2
+                generate_rect(sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, bg_color_white) # Score
+
+                generate_rect(sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end, bg_color_white)
+
+                generate_rect(sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, bg_color_white) # Score
+                generate_rect(sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, bg_color_graphic) # Name
+                generate_rect(sc_team2_color_start, sc_y_start, sc_team2_name_end, sc_y_end - (sc_y_end - sc_y_start), visiting_color1) # Color1
+                generate_rect(sc_team2_color_start, sc_y_end - (sc_y_end - sc_y_start), sc_team2_name_end, sc_y_end, visiting_color2) # Color1
+                generate_rect(sc_team2_name_end, sc_y_start, sc_team2_logo_end, sc_y_end, bg_color_graphic) # Logo
+                
+                # Logo
+                frame = generate_center_logo(league_logo_url, league_width, league_height, sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end)
+                frame = generate_center_logo(home_logo_url, sc_team1_logo_dim, sc_team1_logo_dim, sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end)
+                frame = generate_center_logo(visiting_logo_url,sc_team2_logo_dim, sc_team2_logo_dim,sc_team2_name_end, sc_y_start,sc_team2_logo_end, sc_y_end)
+
+                # Text
+                generate_center_text(home_ini, sc_team1_color_end, sc_y_start, sc_team1_name_end, sc_y_end, color=bg_color_white, font_scale=0.8, thickness=2)
+                generate_center_text(score[0], sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, color=bg_color_graphic)
+                generate_center_text(visiting_ini, sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, color=bg_color_white, font_scale=0.8, thickness=2)
+                generate_center_text(score[2], sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, color=bg_color_graphic)
+
+            if i > int(duration * 0.025) and i < int(duration * 0.125):
+                # Intro
+                name1_topleft, name1_bottomright, rect_height = generate_rect(in_team1_name_start, in_y_start, in_team1_name_end, in_y_end, bg_color_graphic, text=["FC Volendam", "Sparta Rotterdam"], grow="left", font_scale=0.5) # Name
+                in_team1_logo_start = (name1_topleft[0]/width)+in_team1_logo_offset
+                in_team1_logo_end = name1_topleft[0]/width
+                generate_rect(in_team1_logo_start, in_y_start, in_team1_logo_end, in_y_end, bg_color_graphic) # Logo
+                generate_rect(in_team1_name_end, in_y_start, in_team1_color_end, in_y_end - (in_y_end - in_y_start), home_color1) # Color
+                generate_rect(in_team1_name_end, in_y_end - (in_y_end - in_y_start), in_team1_color_end, in_y_end, home_color2) # Color
+                
+                generate_rect(in_team1_color_end, in_y_start, in_score_end, in_y_end, bg_color_white) # Score
+                
+                generate_rect(in_score_end, in_y_start, in_team2_color_end, in_y_end - (in_y_end - in_y_start), visiting_color1) # Color
+                generate_rect(in_score_end, in_y_end - (in_y_end - in_y_start), in_team2_color_end, in_y_end, visiting_color2) # Color
+                name2_topleft, name2_bottomright, rect_height = generate_rect(in_team2_color_end, in_y_start, in_team2_name_end, in_y_end, bg_color_graphic, text=["FC Volendam", "Sparta Rotterdam"], grow="right", font_scale=0.5) # Name
+                in_team2_logo_start = name2_bottomright[0]/width
+                in_team2_logo_end = (name2_bottomright[0]/width)+in_team2_logo_offset
+                generate_rect(in_team2_logo_start, in_y_start, in_team2_logo_end, in_y_end, bg_color_graphic) # Logo
+
+                league_topleft, league_bottomright, rect2_height = generate_rect(in_league_start, in_y_end, in_league_end, sc_y_league_end, bg_color_graphic, text=["ALLSVENSKAN"], font_scale=0.5) # League
+                
+                # Logo
+                in_team_logo_dim = int((in_team2_logo_end*width - in_team2_logo_start*width)*0.9)
+                frame = generate_center_logo("team/volendam.png", in_team_logo_dim, in_team_logo_dim, in_team1_logo_start, in_y_start, in_team1_logo_end, in_y_end)
+                frame = generate_center_logo("team/rotterdam.png", in_team_logo_dim, in_team_logo_dim, in_team2_logo_start, in_y_start, in_team2_logo_end, in_y_end)
+
+                # Text
+                rect_height = rect_height*0.4
+                rect2_height = rect2_height*0.4
+                generate_center_text("FC Volendam", name1_topleft[0]/width, in_y_start, name1_bottomright[0]/width, in_y_end, rect_h=rect_height, color=bg_color_white)
+                generate_center_text("Sparta Rotterdam", name2_topleft[0]/width, in_y_start, name2_bottomright[0]/width, in_y_end, rect_h=rect_height, color=bg_color_white)
+                generate_center_text("1-2", in_team1_color_end, in_y_start, in_score_end, in_y_end, color=bg_color_graphic, rect_h=rect_height)
+                generate_center_text("ALLSVENSKAN", league_topleft[0]/width, in_y_end, league_bottomright[0]/width, sc_y_league_end, color=bg_color_white, rect_h=rect2_height,)
+
+            if i > int(duration*0.3) and i < int(duration*0.45):
+                
+                pass
+
+
             # Convert PIL image back to cv2 image (numpy array)
 
 
@@ -163,34 +514,4 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
         return output_filename
     
 
-def get_action_message_and_icon(meta, language='EN'): 
-    team_logo_url = meta['home_logo_url']
-    score = meta['score']
-    player_name = meta['player_name']
-    
-    icon, message = ''
-
-    if language == 'EN':
-        if meta['action'] == 'shot':
-            icon = get_img_local('shot_icon.png')
-            msg = 'Shot at goal'
-        elif meta['action'] == 'goal':
-            icon = get_img(team_logo_url)
-            msg = 'Goal'
-        elif meta['action'] == 'yellow card':
-            icon = get_img_local('yellow_icon.png')
-            msg = 'Yellow card'
-        elif meta['action'] == 'red card':
-            icon = get_img_local('red_icon.png')
-            msg = 'Red card'
-        elif meta['action'] == 'penalty':
-            icon = get_img(team_logo_url)
-        else:
-            icon = get_img_local('ball_icon.png')
-            msg = 'Missing action'
-
-        if player_name:
-            msg = f'{player_name}: {msg}'
-
-        return icon, msg
         

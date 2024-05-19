@@ -6,6 +6,7 @@ import subprocess
 import time
 import m3u8
 import io
+import glob
 from typing import Dict, List
 from utils import run_and_log
 from graphics import GraphicsTemplate
@@ -229,7 +230,7 @@ def modify_graphic(setting, value):
 
 
 def modify_config(config_file, type, value, index=0):
-    clip_meta = ["home_logo_url", "home_name", "visiting_logo_url", "visiting_name", "league_logo_url", "league_name", "league_name", "action"]
+    clip_meta = ["home_logo_url", "home_name", "home_initials", "visiting_logo_url", "visiting_name", "visiting_initials", "league_logo_url", "league_name", "league_name", "action"]
     json_file_path = path_config(config_file)
 
     with open(json_file_path, 'r') as file:
@@ -262,7 +263,7 @@ def count_clips(config_json):
 def user_options():
     global current_path_config
     config = None
-    real_use = False
+    real_use = True
     while True:
         print("Choose a config template (default: example_1clip.json): \n1. example_1clip.json\n2. example_8clip.json")
         choice = input("Enter your choice (1/2): ")
@@ -622,38 +623,51 @@ def process_encode_final(clips, clip_params, is_comp, encoding_params):
 def verify_file(filename):
     return filename and os.path.exists(filename) and os.path.getsize(filename) > 0
 
+def clean_up():
+    file_pattern = 'video/*_meta.mp4'
+    files_to_remove = glob.glob(file_pattern)
+
+    for file_path in files_to_remove:
+        try:
+            os.remove(file_path)
+            print(f"Successfully deleted file: {file_path}")
+        except Exception as e:
+            print(f"Failed to delete file {file_path}: {e}")
+
 def main():
     global_start_time = time.perf_counter()
     mp4_filename = None
     success = False
     
-    try:
-        user_options()
-        config = open_config()
-        encoding_params = config.get('encoding_parameters', {})
-        clip_params = config.get('clip_parameters', {})
-        
-        #log_initial_params(config, encoding_params, clip_params)
-        video_h, video_w, fps, platform, clips, is_comp = process_clips(config, clip_params, encoding_params)
+    #try:
+    user_options()
+    config = open_config()
+    encoding_params = config.get('encoding_parameters', {})
+    clip_params = config.get('clip_parameters', {})
+    
+    #log_initial_params(config, encoding_params, clip_params)
+    video_h, video_w, fps, platform, clips, is_comp = process_clips(config, clip_params, encoding_params)
 
-        mp4_filename = process_encode_final(clips, clip_params, is_comp, encoding_params)
-        print(mp4_filename)
-        if verify_file(mp4_filename):
-            success = True
-        else:
-            print('Failed to create valid mp4 file.')
+    mp4_filename = process_encode_final(clips, clip_params, is_comp, encoding_params)
+    print(mp4_filename)
+    if verify_file(mp4_filename):
+        success = True
+    else:
+        print('Failed to create valid mp4 file.')
             
-    except Exception as e:
-        print(f'An error has occured: 723{e}')
-    finally:
-        global_end_time = time.perf_counter()
-        #log.info(f'[reels] Total time taken for entire process: {global_end_time - global_start_time:.2f} seconds.')
-        print(f'[reels] Total time taken for entire process: {global_end_time - global_start_time:.2f} seconds.')
+    #except Exception as e:
+        #print(f'An error has occured: {e}')
+    #finally:
+    global_end_time = time.perf_counter()
+    #log.info(f'[reels] Total time taken for entire process: {global_end_time - global_start_time:.2f} seconds.')
+    print(f'[reels] Total time taken for entire process: {global_end_time - global_start_time:.2f} seconds.')
 
-        if success:
-            print('Successfully completed entire process')
-        else:
-            print('Failed to compelete entire process')
+    if success:
+        print('Successfully completed entire process')
+    else:
+        print('Failed to compelete entire process')
+
+    clean_up()
 
 if __name__ == '__main__':
     main()
