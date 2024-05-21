@@ -25,10 +25,11 @@ class Clip:
         self.config = config
         self.encoding_params = config.get('encoding_params', {})
         self.aspect_ratio = self.encoding_params.get('aspect_ratio', None)
-        self.platform = self.encoding_params.get('platform',None)
+        self.platform = self.encoding_params.get('platform', None)
         self.bitrate = self.encoding_params.get('video_bitrate', None)
         self.audio_bitrate = self.encoding_params.get('audio_bitrate', None)
         self.audio_tracks = self.encoding_params.get('audio_tracks', None)
+        self.destination = config.get('destination', {}).get('path', {None})
         self.num_audio_streams = 1
         self.graphic = self.initialize_graphics(graphic_data)
 
@@ -103,6 +104,9 @@ class Clip:
     def duration(self):
         return self.end_offset_s - self.start_offset_s
 
+    def path(self):
+        return self.destination
+    
 def get_response(url: str, timeout: int = 2, retries: int = 2) -> requests.Response:
     headers = {'X-Forzify-Client': 'telenor-internal'}# if IN_CLOUD else {}
     for attempt in range(retries):
@@ -265,7 +269,7 @@ def user_options():
     config = None
     real_use = True
     while True:
-        print("Choose a config template (default: example_1clip.json): \n1. example_1clip.json\n2. example_8clip.json")
+        print("Choose a config template (default: example_1clip.json): \n1. example_1clip.json\n2. example_2clip.json")
         choice = input("Enter your choice (1/2): ")
 
         if choice == '1':
@@ -273,7 +277,7 @@ def user_options():
             current_path_config = path_config(config)
             
         elif choice == '2':
-            config = 'example_8clip.json'
+            config = 'example_2clip.json'
             current_path_config = path_config(config)
             
         else:
@@ -601,7 +605,8 @@ def merge_all_videos(clips: List[Clip], mp4_file: str, clip_params: dict, video_
     return ffmpeg_cmd
 
 def process_encode_final(clips, clip_params, is_comp, encoding_params):
-    mp4_filename = 'video/output.mp4'
+    print(clips[0].path())
+    mp4_filename = f'{clips[0].path()}/output.mp4'
    
     if os.path.exists(mp4_filename):
         os.remove(mp4_filename)

@@ -20,8 +20,7 @@
     },
     "destinations": {
         "type": "local",
-        "path": "1clip.mp4",
-        "video_export_id": "7e49b8960142"
+        "path": "video/1clip"
     },
     "clips": [
         {
@@ -31,9 +30,9 @@
                     "home_logo_url": "team/tokyo.png",
                     "home_name": "FC Tokyo",
                     "home_initials": "FCT",
-                    "visiting_logo_url": "team/kashima.png",
-                    "visiting_name": "Kashima Antlers",
-                    "visiting_initials": "KASM",
+                    "visiting_logo_url": "team/tokyo.png",
+                    "visiting_name": "FC Tokyo",
+                    "visiting_initials": "FCT",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",

@@ -53,63 +53,12 @@ class GraphicsTemplate:
         
         create_animated_meta(video_h, video_w, self.clip.config['clip_meta'], self.bg_color, self.text_color, home_color, visiting_color, self.clip.local_file_name, clip_num, graphic_template, graphic_layout, self.clip.aspect_ratio)
         
-        print(f'Adding graphic overlay took: {time.perf_counter() - tpc}')
-        
-def rounded_rectangle(src, top_left, bottom_right, color, radius=1, thickness=1, opacity=1, line_type=cv2.LINE_AA):
-    overlay = src.copy()
-    #  corners:
-    #  p1 - p2
-    #  |     |
-    #  p4 - p3
+        print(f'Adding graphic overlay took: {time.perf_counter() - tpc}')   
 
-    p1 = top_left
-    p2 = (bottom_right[0], top_left[1])
-    p3 = (bottom_right[0], bottom_right[1])
-    p4 = (top_left[0], bottom_right[1])
-
-    height = abs(bottom_right[1] - top_left[1])
-
-    if radius > 1:
-        radius = 1
-
-    corner_radius = int(radius * (height/2))
-
-    if thickness < 0:
-
-        #big rect
-        top_left_main_rect = (int(p1[0] + corner_radius), int(p1[1]))
-        bottom_right_main_rect = (int(p3[0] - corner_radius), int(p3[1]))
-
-        top_left_rect_left = (p1[0], p1[1] + corner_radius)
-        bottom_right_rect_left = (p4[0] + corner_radius, p4[1] - corner_radius)
-
-        top_left_rect_right = (p2[0] - corner_radius, p2[1] + corner_radius)
-        bottom_right_rect_right = (p3[0], p3[1] - corner_radius)
-
-        all_rects = [
-        [top_left_main_rect, bottom_right_main_rect], 
-        [top_left_rect_left, bottom_right_rect_left], 
-        [top_left_rect_right, bottom_right_rect_right]]
-
-        [cv2.rectangle(src, rect[0], rect[1], color, thickness) for rect in all_rects]
-
-    # draw straight lines
-    cv2.line(src, (p1[0] + corner_radius, p1[1]), (p2[0] - corner_radius, p2[1]), color, abs(thickness), line_type)
-    cv2.line(src, (p2[0], p2[1] + corner_radius), (p3[0], p3[1] - corner_radius), color, abs(thickness), line_type)
-    cv2.line(src, (p3[0] - corner_radius, p4[1]), (p4[0] + corner_radius, p3[1]), color, abs(thickness), line_type)
-    cv2.line(src, (p4[0], p4[1] - corner_radius), (p1[0], p1[1] + corner_radius), color, abs(thickness), line_type)
-
-    # draw arcs
-    cv2.ellipse(src, (p1[0] + corner_radius, p1[1] + corner_radius), (corner_radius, corner_radius), 180.0, 0, 90, color ,thickness, line_type)
-    cv2.ellipse(src, (p2[0] - corner_radius, p2[1] + corner_radius), (corner_radius, corner_radius), 270.0, 0, 90, color , thickness, line_type)
-    cv2.ellipse(src, (p3[0] - corner_radius, p3[1] - corner_radius), (corner_radius, corner_radius), 0.0, 0, 90,   color , thickness, line_type)
-    cv2.ellipse(src, (p4[0] + corner_radius, p4[1] - corner_radius), (corner_radius, corner_radius), 90.0, 0, 90,  color , thickness, line_type)
-
-    cv2.addWeighted(overlay, opacity, src, 1 - opacity, 0, src)
-    return src        
-
-def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), text=[], font_scale=1, isRounded=False, grow=""):
-    global font_style, opacity, width, height, style, frame
+def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), text=[], font_scale=1, grow="", opacity=1):
+    global font_style, width, height, frame
+    if opacity != 1:
+        overlay = frame.copy()
     # If rectangle is centered both horiz. and vert.
     if (end_x == 1 and end_y == 1):
         top_left = int(width * x_offset), int(height * y_offset)
@@ -159,10 +108,11 @@ def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), t
         top_left = tuple(new_top_left)
         bottom_right = tuple(new_bottom_right)
     
-    if isRounded:
-        rounded_rectangle(frame, top_left, bottom_right, color, radius=0.1, thickness=-1, opacity=opacity)
-    else:
-        cv2.rectangle(frame, top_left, bottom_right, color, -1)
+    cv2.rectangle(frame, top_left, bottom_right, color, -1)
+    
+    if opacity != 1:
+        cv2.addWeighted(overlay, opacity, frame, 1 - opacity, 0, frame)
+
     return top_left, bottom_right, bottom_right[1]-top_left[1] # Return top_left, bottom_right and height of rect.
 
 def generate_center_text(text, x_offset, y_offset, end_x=1, end_y=1, position=0, color=(0,0,0), thickness=3, rect_h=0, font_scale=1):
@@ -245,7 +195,6 @@ def generate_center_logo(logo, logo_w, logo_h, x_offset, y_offset, end_x=1, end_
 
 def is_image(var):
     return isinstance(var, Image.Image)
-
 
 def get_img(url: str) -> Image or None:
     response = requests.get(url)
@@ -338,13 +287,18 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
         home_ini = meta['home_initials']
         home_color1 = hex_to_bgr(home_color[0])
         home_color2 = hex_to_bgr(home_color[1])
+
         visiting_logo_url = meta['visiting_logo_url']
         visiting_name = meta['visiting_name']
         visiting_ini = meta['visiting_initials']
         visiting_color1 = hex_to_bgr(visiting_color[0])
         visiting_color2 = hex_to_bgr(visiting_color[1])
+        
         league_logo_url = meta['league_logo_url']
+        league_name = meta['league_name']
         icon, msg = get_action_message_and_icon(meta)
+        player_logo_url = "resources/img/icons/player_icon.png"
+        player_name = meta['player_name']
         score = meta['score']
         game_time = meta['time']
 
@@ -355,7 +309,8 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                 
                 bg_color_graphic = hex_to_bgr(bg_color) # 52 52 52
                 bg_color_white = hex_to_bgr("#FFFFFF")
-                
+                bg_color_black = hex_to_bgr("#343434")
+                text_color = hex_to_bgr(text_color)
 
                 # Introduction
                 # y-offset
@@ -382,6 +337,7 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                 sc_y_start = 0.055
                 sc_y_end = 0.1
                 sc_y_league_end = 0.9
+                sc_y_time_end = 0.145
 
                 # x-offset
                 sc_team1_logo_start = 0.04
@@ -395,6 +351,17 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                 sc_team2_name_end = 0.271
                 sc_team2_color_start = 0.268
                 sc_team2_logo_end = 0.295
+
+                # # Action
+                # # y-offset
+                # ac_y_start = 
+                # ac_y_end = 
+                # # x-offset
+                # ac_team_color_start = 0.04
+                # ac_team_color_end = 0.043
+                # ac_player_end = 0.068
+                # ac_name_end = 0.08
+                # ac_action_offset = 0.025 
 
                 # Icons !! Aspect ratio is not kept !!
                 if "j1" in league_logo_url or "allsvenskan" in league_logo_url:
@@ -438,32 +405,36 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                 break
             i += 1
             
-            # Fade-in effect team logo
+            # Scoreboard
             if i <= int(duration):
-                generate_rect(sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end, bg_color_graphic) # Logo
-                generate_rect(sc_team1_color_end, sc_y_start, sc_team1_name_end, sc_y_end, bg_color_graphic) # Name
-                generate_rect(sc_team1_logo_end, sc_y_start, sc_team1_color_end, sc_y_end - (sc_y_end - sc_y_start), home_color1) # Color1
-                generate_rect(sc_team1_logo_end, sc_y_end - (sc_y_end - sc_y_start), sc_team1_color_end, sc_y_end - (sc_y_end - sc_y_start), home_color2) # Color2
-                generate_rect(sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, bg_color_white) # Score
+                # Home team
+                generate_rect(sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end, bg_color_graphic) # Logo container
+                generate_rect(sc_team1_color_end, sc_y_start, sc_team1_name_end, sc_y_end, bg_color_graphic) # Name container
+                generate_rect(sc_team1_logo_end, sc_y_start, sc_team1_color_end, sc_y_end - (sc_y_end - sc_y_start)/2, home_color1) # Color1 rect
+                generate_rect(sc_team1_logo_end, sc_y_end - (sc_y_end - sc_y_start)/2, sc_team1_color_end, sc_y_end, home_color2) # Color2 rect
+                generate_rect(sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, bg_color_white) # Score container
 
-                generate_rect(sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end, bg_color_white)
+                generate_rect(sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end, bg_color_white) # League container
+                generate_rect(sc_team2_score_end, sc_y_end, sc_team2_logo_end, sc_y_time_end, bg_color_black, opacity=0.11) # Time container
 
-                generate_rect(sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, bg_color_white) # Score
-                generate_rect(sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, bg_color_graphic) # Name
-                generate_rect(sc_team2_color_start, sc_y_start, sc_team2_name_end, sc_y_end - (sc_y_end - sc_y_start), visiting_color1) # Color1
-                generate_rect(sc_team2_color_start, sc_y_end - (sc_y_end - sc_y_start), sc_team2_name_end, sc_y_end, visiting_color2) # Color1
-                generate_rect(sc_team2_name_end, sc_y_start, sc_team2_logo_end, sc_y_end, bg_color_graphic) # Logo
+                # Visiting team
+                generate_rect(sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, bg_color_white)
+                generate_rect(sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, bg_color_graphic)
+                generate_rect(sc_team2_color_start, sc_y_start, sc_team2_name_end, sc_y_end - (sc_y_end - sc_y_start)/2, visiting_color1)
+                generate_rect(sc_team2_color_start, sc_y_end - (sc_y_end - sc_y_start)/2, sc_team2_name_end, sc_y_end, visiting_color2)
+                generate_rect(sc_team2_name_end, sc_y_start, sc_team2_logo_end, sc_y_end, bg_color_graphic)
                 
                 # Logo
-                frame = generate_center_logo(league_logo_url, league_width, league_height, sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end)
-                frame = generate_center_logo(home_logo_url, sc_team1_logo_dim, sc_team1_logo_dim, sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end)
-                frame = generate_center_logo(visiting_logo_url,sc_team2_logo_dim, sc_team2_logo_dim,sc_team2_name_end, sc_y_start,sc_team2_logo_end, sc_y_end)
+                frame = generate_center_logo(league_logo_url, league_width, league_height, sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end) # League
+                frame = generate_center_logo(home_logo_url, sc_team1_logo_dim, sc_team1_logo_dim, sc_team1_logo_start, sc_y_start, sc_team1_logo_end, sc_y_end) # Home team
+                frame = generate_center_logo(visiting_logo_url,sc_team2_logo_dim, sc_team2_logo_dim,sc_team2_name_end, sc_y_start,sc_team2_logo_end, sc_y_end) # Visiting team
 
                 # Text
-                generate_center_text(home_ini, sc_team1_color_end, sc_y_start, sc_team1_name_end, sc_y_end, color=bg_color_white, font_scale=0.8, thickness=2)
-                generate_center_text(score[0], sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, color=bg_color_graphic)
-                generate_center_text(visiting_ini, sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, color=bg_color_white, font_scale=0.8, thickness=2)
-                generate_center_text(score[2], sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, color=bg_color_graphic)
+                generate_center_text(home_ini, sc_team1_color_end, sc_y_start, sc_team1_name_end, sc_y_end, color=bg_color_white, font_scale=0.8, thickness=2) # Home initials
+                generate_center_text(score[0], sc_team1_name_end, sc_y_start, sc_team1_score_end, sc_y_end, color=bg_color_graphic) # Home score
+                generate_center_text(visiting_ini, sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, color=bg_color_white, font_scale=0.8, thickness=2) # Visiting intials
+                generate_center_text(score[2], sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, color=bg_color_graphic) # Visiting score
+                generate_center_text(game_time, sc_team2_score_end, sc_y_end, sc_team2_logo_end, sc_y_time_end, color=bg_color_white) # Game time
 
             if i > int(duration * 0.025) and i < int(duration * 0.125):
                 # Intro
@@ -471,13 +442,13 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                 in_team1_logo_start = (name1_topleft[0]/width)+in_team1_logo_offset
                 in_team1_logo_end = name1_topleft[0]/width
                 generate_rect(in_team1_logo_start, in_y_start, in_team1_logo_end, in_y_end, bg_color_graphic) # Logo
-                generate_rect(in_team1_name_end, in_y_start, in_team1_color_end, in_y_end - (in_y_end - in_y_start), home_color1) # Color
-                generate_rect(in_team1_name_end, in_y_end - (in_y_end - in_y_start), in_team1_color_end, in_y_end, home_color2) # Color
+                generate_rect(in_team1_name_end, in_y_start, in_team1_color_end, in_y_end - (in_y_end - in_y_start)/2, home_color1) # Color
+                generate_rect(in_team1_name_end, in_y_end - (in_y_end - in_y_start)/2, in_team1_color_end, in_y_end, home_color2) # Color
                 
                 generate_rect(in_team1_color_end, in_y_start, in_score_end, in_y_end, bg_color_white) # Score
                 
-                generate_rect(in_score_end, in_y_start, in_team2_color_end, in_y_end - (in_y_end - in_y_start), visiting_color1) # Color
-                generate_rect(in_score_end, in_y_end - (in_y_end - in_y_start), in_team2_color_end, in_y_end, visiting_color2) # Color
+                generate_rect(in_score_end, in_y_start, in_team2_color_end, in_y_end - (in_y_end - in_y_start)/2, visiting_color1) # Color
+                generate_rect(in_score_end, in_y_end - (in_y_end - in_y_start)/2, in_team2_color_end, in_y_end, visiting_color2) # Color
                 name2_topleft, name2_bottomright, rect_height = generate_rect(in_team2_color_end, in_y_start, in_team2_name_end, in_y_end, bg_color_graphic, text=["FC Volendam", "Sparta Rotterdam"], grow="right", font_scale=0.5) # Name
                 in_team2_logo_start = name2_bottomright[0]/width
                 in_team2_logo_end = (name2_bottomright[0]/width)+in_team2_logo_offset
@@ -487,16 +458,16 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                 
                 # Logo
                 in_team_logo_dim = int((in_team2_logo_end*width - in_team2_logo_start*width)*0.9)
-                frame = generate_center_logo("team/volendam.png", in_team_logo_dim, in_team_logo_dim, in_team1_logo_start, in_y_start, in_team1_logo_end, in_y_end)
-                frame = generate_center_logo("team/rotterdam.png", in_team_logo_dim, in_team_logo_dim, in_team2_logo_start, in_y_start, in_team2_logo_end, in_y_end)
+                frame = generate_center_logo(home_logo_url, in_team_logo_dim, in_team_logo_dim, in_team1_logo_start, in_y_start, in_team1_logo_end, in_y_end)
+                frame = generate_center_logo(visiting_logo_url, in_team_logo_dim, in_team_logo_dim, in_team2_logo_start, in_y_start, in_team2_logo_end, in_y_end)
 
                 # Text
                 rect_height = rect_height*0.4
                 rect2_height = rect2_height*0.4
-                generate_center_text("FC Volendam", name1_topleft[0]/width, in_y_start, name1_bottomright[0]/width, in_y_end, rect_h=rect_height, color=bg_color_white)
-                generate_center_text("Sparta Rotterdam", name2_topleft[0]/width, in_y_start, name2_bottomright[0]/width, in_y_end, rect_h=rect_height, color=bg_color_white)
-                generate_center_text("1-2", in_team1_color_end, in_y_start, in_score_end, in_y_end, color=bg_color_graphic, rect_h=rect_height)
-                generate_center_text("ALLSVENSKAN", league_topleft[0]/width, in_y_end, league_bottomright[0]/width, sc_y_league_end, color=bg_color_white, rect_h=rect2_height,)
+                generate_center_text(home_name, name1_topleft[0]/width, in_y_start, name1_bottomright[0]/width, in_y_end, rect_h=rect_height, color=bg_color_white)
+                generate_center_text(visiting_name, name2_topleft[0]/width, in_y_start, name2_bottomright[0]/width, in_y_end, rect_h=rect_height, color=bg_color_white)
+                generate_center_text(score, in_team1_color_end, in_y_start, in_score_end, in_y_end, color=bg_color_graphic, rect_h=rect_height)
+                generate_center_text(league_name, league_topleft[0]/width, in_y_end, league_bottomright[0]/width, sc_y_league_end, color=bg_color_white, rect_h=rect2_height,)
 
             if i > int(duration*0.3) and i < int(duration*0.45):
                 
