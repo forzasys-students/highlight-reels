@@ -60,6 +60,7 @@ class Clip:
             return self._info_cache
         
         if self.local_file_name is not None and os.path.isfile(self.local_file_name):
+            
             probe = subprocess.check_output(
                 ['ffprobe',
                  '-v', 'error',
@@ -512,23 +513,6 @@ def user_options():
             print(f"Error resolving input '{choice}'")
             continue
         break
-   
-def log_initial_params(config, encoding_params, clip_params):
-    # log.info(
-    #     f'Parameters are as below:\n'
-    #     f'Encoding Params: {encoding_params}\n'
-    #     f'Clip Params: {clip_params}\n'
-    #     f'Clips: \n {config["clips"]}'
-    # )
-    pass
-
-def report_exit(msg, success=False):
-    # if success:
-    #     log.info(msg)
-    # else:
-    #     log.error(msg)
-    
-    exit(0 if success else 1)
 
 def open_config():
     if current_path_config is None:
@@ -605,8 +589,7 @@ def merge_all_videos(clips: List[Clip], mp4_file: str, clip_params: dict, video_
     return ffmpeg_cmd
 
 def process_encode_final(clips, clip_params, is_comp, encoding_params):
-    print(clips[0].path())
-    mp4_filename = f'{clips[0].path()}/output.mp4'
+    mp4_filename = f'video/output.mp4'
    
     if os.path.exists(mp4_filename):
         os.remove(mp4_filename)
