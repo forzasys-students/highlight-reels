@@ -506,7 +506,7 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                 ac_team_length = sc_league_length
 
                 ac_player_name_start = ac_team_center_x
-                ac_player_name_end = ac_player_name_start + 0.06
+                ac_player_name_end = ac_player_name_start + 0.03
                 ac_action_name_start = ac_team_center_x
                 ac_action_name_end = ac_action_name_start + 0.04
 
