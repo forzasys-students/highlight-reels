@@ -639,7 +639,7 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                     in_team2_score_end = in_team2_color_end + in_team2_score_offset
                     generate_rect(in_team2_color_end, in_team2_y_start, in_team2_score_end, in_team2_y_end, color=bg_color_graphic)
                     in_team2_logo_end = in_team2_score_end + in_team2_logo_offset
-                    generate_rect(in_team2_score_end, in_team2_y_start, sc_team2_logo_end, in_team2_y_end, color=bg_color_black)
+                    generate_rect(in_team2_score_end, in_team2_y_start, in_team2_logo_end, in_team2_y_end, color=bg_color_black)
                     
                     # Draw logos 
                     frame = generate_center_logo(league_logo_url, in_league_height, in_league_width, in_league_center_x, in_league_center_y, in_league_center_x, in_league_center_y)
@@ -652,7 +652,7 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                     generate_center_text(score[0], in_team1_color_end, in_team1_y_start, in_team1_score_end, in_team1_y_end, color=text_color_graphic)
                     generate_center_text(score[-1], in_team2_name_end, in_team2_y_start, in_team2_score_end, in_team2_y_end, color=text_color_graphic)
                     generate_center_text(league_name, in_league_topleft[0]/width, in_league_topleft[1]/height, in_league_bottomright[0]/width, in_league_bottomright[1]/height, color=bg_color_white)
-                    generate_center_text(game_time)
+                    
 
             # Write the frame
             out.write(frame)

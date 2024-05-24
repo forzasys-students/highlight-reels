@@ -15,7 +15,7 @@
     "clip_parameters": {
         "clip_transitions": false,
         "clip_graphic_template": {
-            "graphic_template": "eredivisie"
+            "graphic_template": "j1_league"
         }
     },
     "destinations": {
@@ -27,20 +27,20 @@
             "video_url": "resources/clips/clip_1_16_9.mp4",
             "clip_meta": [
                 {
-                    "home_logo_url": "team/psv.png",
-                    "home_name": "PSV Eindhoven",
-                    "home_initials": "PSV",
-                    "visiting_logo_url": "team/fortuna.png",
-                    "visiting_name": "Fortuna Sittard",
-                    "visiting_initials": "FOR",
+                    "home_logo_url": "team/tokyo.png",
+                    "home_name": "FC Tokyo",
+                    "home_initials": "FCT",
+                    "visiting_logo_url": "team/kashima.png",
+                    "visiting_name": "Kashima Antlers",
+                    "visiting_initials": "KASM",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
-                    "league_logo_url": "league/eredivisie.png",
-                    "league_name": "Eredivisie",
-                    "player_name": "Andr\u00c3\u00a9 Ramalho",
-                    "action": "yellow card",
+                    "league_logo_url": "league/j1.png",
+                    "league_name": "J1 League",
+                    "player_name": "Andre Ramalho",
+                    "action": "goal",
                     "score": "2-1",
                     "phase": "1st half",
                     "time": "12:34"
