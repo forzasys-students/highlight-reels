@@ -1,6 +1,6 @@
 {
     "general_settings": {
-        "graphic_layout": "left",
+        "graphic_layout": "center",
         "home_color": [
             "#ffffff",
             "#ED1C24"
@@ -9,7 +9,7 @@
             "#000000",
             "#000000"
         ],
-        "template": "diamond"
+        "template": "rectangle"
     },
     "j1_league": {
         "fg_color": "",
