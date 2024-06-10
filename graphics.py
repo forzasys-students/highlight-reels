@@ -686,5 +686,3 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
         out.release()
         return output_filename
     
-
-        

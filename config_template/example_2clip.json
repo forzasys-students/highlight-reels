@@ -15,7 +15,7 @@
     "clip_parameters": {
         "clip_transitions": false,
         "clip_graphic_template": {
-            "graphic_template": "allsvenskan"
+            "graphic_template": "eredivisie"
         }
     },
     "destinations": {
@@ -23,30 +23,6 @@
         "path": "video/2clip"
     },
     "clips": [
-        {
-            "video_url": "resources/clips/clip_1_16_9.mp4",
-            "clip_meta": [
-                {
-                    "home_logo_url": "team/volendam.png",
-                    "home_name": "FC Volendam",
-                    "home_initials": "VOL",
-                    "visiting_logo_url": "team/rotterdam.png",
-                    "visiting_name": "Sparta Rotterdam",
-                    "visiting_initials": "SPA",
-                    "game_date": "2023-05-13",
-                    "game_round": "3",
-                    "home_team_goals": "3",
-                    "visiting_team_goals": "4",
-                    "league_logo_url": "league/allsvenskan.png",
-                    "league_name": "Allsvenskan",
-                    "player_name": "Mikael Mikaelson",
-                    "action": "shot",
-                    "score": "2-1",
-                    "phase": "1st half",
-                    "time": "12:34"
-                }
-            ]
-        },
         {
             "video_url": "resources/clips/clip_1_16_9.mp4",
             "clip_meta": [
@@ -61,10 +37,34 @@
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
-                    "league_logo_url": "league/allsvenskan.png",
-                    "league_name": "Allsvenskan",
+                    "league_logo_url": "league/eredivisie.png",
+                    "league_name": "Eredivisie",
                     "player_name": "Mikael Mikaelson",
-                    "action": "red card",
+                    "action": "goal",
+                    "score": "2-1",
+                    "phase": "1st half",
+                    "time": "12:34"
+                }
+            ]
+        },
+        {
+            "video_url": "resources/clips/clip_1_16_9.mp4",
+            "clip_meta": [
+                {
+                    "home_logo_url": "team/urawa.png",
+                    "home_name": "Urawa Red Diamond",
+                    "home_initials": "URAW",
+                    "visiting_logo_url": "team/tokyoverdy.png",
+                    "visiting_name": "Tokyo Verdy",
+                    "visiting_initials": "TK-V",
+                    "game_date": "2023-05-13",
+                    "game_round": "3",
+                    "home_team_goals": "3",
+                    "visiting_team_goals": "4",
+                    "league_logo_url": "league/eredivisie.png",
+                    "league_name": "Eredivisie",
+                    "player_name": "Mikael Mikaelson",
+                    "action": "shot",
                     "score": "1-2",
                     "phase": "1st half",
                     "time": "12:34"

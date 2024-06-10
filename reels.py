@@ -19,33 +19,32 @@ CRF_OUTPUT_VIDEO = 22
 
 class Clip:
     def __init__(self, config: Dict, local_file_name: str, graphic_data):
-        self.local_file_name = local_file_name # File name and path of video
-        self.local_file_name_duration = None # Length of video
-        self._info_cache = None # Video information
-        self.config = config # Clip configuration
-        self.encoding_params = config.get('encoding_params', {}) # Encoding parameteres
-        self.aspect_ratio = self.encoding_params.get('aspect_ratio', None) # Aspect ratio requested by user
-        self.platform = self.encoding_params.get('platform', None) # Aspect ratio from videofile
-        self.bitrate = self.encoding_params.get('video_bitrate', None) # Video bitrate
-        self.audio_bitrate = self.encoding_params.get('audio_bitrate', None) # Audio bitrate
-        self.audio_tracks = self.encoding_params.get('audio_tracks', None) # Amount of audiotracks
-        self.destination = config.get('destination', {}).get('path', {None}) # Filepath of product
-        self.num_audio_streams = 1 
-        self.graphic = self.initialize_graphics(graphic_data) # Initialize graphics
+        self.local_file_name = local_file_name
+        self.local_file_name_duration = None
+        self._info_cache = None
+        self.config = config
+        self.encoding_params = config.get('encoding_params', {})
+        self.aspect_ratio = self.encoding_params.get('aspect_ratio', None)
+        self.platform = self.encoding_params.get('platform', None)
+        self.bitrate = self.encoding_params.get('video_bitrate', None)
+        self.audio_bitrate = self.encoding_params.get('audio_bitrate', None)
+        self.audio_tracks = self.encoding_params.get('audio_tracks', None)
+        self.destination = config.get('destination', {}).get('path', {None})
+        self.num_audio_streams = 1
+        self.graphic = self.initialize_graphics(graphic_data)
 
-    # Initializes graphics to be stored in Clip-object
     def initialize_graphics(self, graphic_data):
         try:
             json_file_path = path_graphic('main_template.json')
             with open(json_file_path, 'r') as file:
                 data = json.load(file)
-                template = data['general_settings']['template'] # Returns graphicpack to be used
+                template = data['general_settings']['template']
                 
                 if not template:
                     print(f"'No template for found, graphics are disabled.")
                     return None
                 
-                graphics = GraphicsTemplate() # Concatonates graphic configuration to object for Clip
+                graphics = GraphicsTemplate()
                 
                 if not graphics.initialize(self, graphic_data):
                     print(f'Could not initialize graphic template {template}')
@@ -55,14 +54,13 @@ class Clip:
         except Exception as e:
             print(f"Error loading graphic_template: {e}")
             return None
-    
-    # Returns technical data of videofile
+        
     def _fetch_video_info(self):
         if self._info_cache is not None:
             return self._info_cache
         
         if self.local_file_name is not None and os.path.isfile(self.local_file_name):
-            # FFmpeg checks and returns info
+            
             probe = subprocess.check_output(
                 ['ffprobe',
                  '-v', 'error',
@@ -74,7 +72,7 @@ class Clip:
             return self._info_cache
         else:
             raise Exception(f'File not found: {self.local_file_name}')
-    # Returns frames per second of video
+
     def frame_rate(self):
         info = self._fetch_video_info()
         fps_str = info["streams"][0]["avg_frame_rate"]
@@ -86,15 +84,15 @@ class Clip:
             fps = float(fps_str)
 
         return fps
-    # Calculates height of video
+    
     def video_height(self):
         info = self._fetch_video_info()
         return info['streams'][0]['height']
-    # Calculates width of video
+            
     def video_width(self):
         info = self._fetch_video_info()
         return info["streams"][0]["width"]
-    # Returns the length of the video using FFmpeg
+    
     def file_duration(self):
         if self.local_file_name is not None and os.path.isfile(self.local_file_name):
             if self.local_file_name_duration is None:
@@ -104,13 +102,25 @@ class Clip:
             return self.local_file_name_duration
         raise Exception('File does not exist: %s' % self.local_file_name)
     
-    # Get-metode for length of video with transitions, not relevant in our iteration
     def duration(self):
         return self.end_offset_s - self.start_offset_s
 
-    # Get-metode for filepath
     def path(self):
         return self.destination
+    
+def get_response(url: str, timeout: int = 2, retries: int = 2) -> requests.Response:
+    headers = {'X-Forzify-Client': 'telenor-internal'}# if IN_CLOUD else {}
+    for attempt in range(retries):
+        try:
+            response = session.get(url, headers=headers, timeout=timeout)
+            response.raise_for_status()
+            return response
+        except requests.RequestException as e:
+            if attempt >= retries - 1:
+                #log.error(f'Error fetching {url} after {retries} attempts: {e}')
+                print(f'Error fetching {url} after {retries} attempts: {e}')
+                raise
+            time.sleep(0.2)
 
 # Utilizes a web-api to GET data regarding hexadecimal value, i.e. name of the color
 def translate_color(hex_color, target_language='en'):
@@ -223,16 +233,14 @@ def modify_graphic(setting, value):
     with open(json_file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-# Edits JSON-file "example_1clip.json" or "example_2clip.json"
+
 def modify_config(config_file, type, value, index=0):
     clip_meta = ["home_logo_url", "home_name", "home_initials", "visiting_logo_url", "visiting_name", "visiting_initials", "league_logo_url", "league_name", "league_name", "action"]
     json_file_path = path_config(config_file)
 
-    # Opens requested config_template for reading and writing
     with open(json_file_path, 'r') as file:
         data = json.load(file)
 
-    # Writes the data corresponding section 
     if(type == 'graphic_template'):
         data['clip_parameters']['clip_graphic_template'][type] = value
     elif(type in clip_meta):
@@ -261,8 +269,6 @@ def user_options():
     global current_path_config
     config = None
     real_use = True
-
-    # Selects which config_template to be edited and used
     while True:
         print("Choose a config template (default: example_1clip.json): \n1. example_1clip.json\n2. example_2clip.json")
         choice = input("Enter your choice (1/2): ")
@@ -279,10 +285,8 @@ def user_options():
             print(f"Error resolving input '{choice}'")
             continue
         break
-    
-    # Toggle between "real_use", disables whole while-loop to skip user-inputs when testing functionality
+
     while real_use:
-        # Selects platform and aspect ratio for video encoding
         ptemp = 'platform'
         atemp = 'aspect_ratio'
         print("Choose a platform for encoding (default: youtube): \n1. Youtube (16:9)\n2. Tiktok (9:16)\n3. Instagram (1:1)\n4. Facebook (1:1)")
@@ -292,26 +296,19 @@ def user_options():
             modify_config(config, ptemp, 'youtube')
             modify_config(config, atemp, [16, 9])
         elif choice == '2' or choice == 'tiktok':
-            print(f"Error resolving input '{choice}', not implemented yet!")
-            continue
-            #modify_config(config, ptemp, 'tiktok')
-            #modify_config(config, atemp, [9, 16])
+            modify_config(config, ptemp, 'tiktok')
+            modify_config(config, atemp, [9, 16])
         elif choice == '3' or choice == 'instagram':
-            print(f"Error resolving input '{choice}', not implemented yet!")
-            continue
-            #modify_config(config, ptemp, 'instagram')
-            #modify_config(config, atemp, [1, 1])
+            modify_config(config, ptemp, 'instagram')
+            modify_config(config, atemp, [1, 1])
         elif choice == '4' or choice == 'facebook':
-            print(f"Error resolving input '{choice}', not implemented yet!")
-            continue
-            #modify_config(config, ptemp, 'facebook')
-            #modify_config(config, atemp, [1, 1])
+            modify_config(config, ptemp, 'facebook')
+            modify_config(config, atemp, [1, 1])
         else:
             print(f"Error resolving input '{choice}'")
             continue
         break
 
-    # User selects which layout the scoreboard will be placed
     while real_use:
         orientation = ''
         setting = "graphic_layout"
@@ -328,8 +325,7 @@ def user_options():
             print(f"Error resolving input '{choice}'")
             continue
         break
-    
-    # User selects which graphic template which will be used
+
     while real_use:
         graphic_pack = ''
         setting = "template"
@@ -347,16 +343,14 @@ def user_options():
             continue
         break
 
-    # User is prompted question to change metadata of chosen config_template
     while real_use:
         print(f"Would you like to change the metadata and select a theme?")
         choice = input("Enter your choice (y/yes/n/no): ")
 
         if choice == 'yes' or choice == 'y':
             cmeta = 'action'
-            # Iterates over all clips in config, repeats itself only when multiple clips are present in config
+            # Iterates over all clips in config, repeats itself only when multiple clips are present in config.
             for i in range(count_clips(config)):
-                # Select metadata for x clips
                 while True:
                     print(f"Choose an action for clip {i+1} out of {count_clips(config)} (default: goal): \n1. Goal\n2. Shot\n3. Yellow card\n4. Red card\n5. Penalty")
                     choice = input("Enter your choice (1/2/3/4/5): ")
@@ -473,7 +467,7 @@ def user_options():
                         modify_config(config, visiting_n, 'FC Tokyo', i)
                         modify_config(config, visiting_i, 'FCT', i)
                         modify_graphic(visiting_c, ["#002B67","#FF0B33"])
-                        modify_config(config, visiting_url, "team/tokyo.png", i)
+                        modify_config(config, visiting_url, "team/tokyo.png", i) # Changes local url to team's logo
                     elif choice == '2':
                         modify_config(config, visiting_n, 'Kashima Antlers', i)
                         modify_config(config, visiting_i, 'KASM', i)
@@ -520,7 +514,6 @@ def user_options():
             continue
         break
 
-# Prepares config_template for read-use
 def open_config():
     if current_path_config is None:
         print(f"{current_path_config} was not found. ")
@@ -528,10 +521,9 @@ def open_config():
         with open(current_path_config, 'r') as f:
             return json.loads(f.read())
     except Exception as e:
-        print(f'An error occured while opening config: {e}')
+        # log.error(f'An error occured while opening config: {e}')
         return None
     
-# Return graphic template and general settings for graphics
 def get_graphic(graphic_template, config):
     if graphic_template is None:
         return None
@@ -540,18 +532,15 @@ def get_graphic(graphic_template, config):
             graphic_data = json.load(f)
             return graphic_data.get(graphic_template), graphic_data.get("general_settings")
     except Exception as e:
-        print(f'An error occured while loading graphic: {e}')
+        # log.error(f'An error occured while loading graphic: {e}')
         return None
 
-# Initialize Clip-object with:
-# Clip configuration, File name(s) for clip(s) and graphic configuration
 def initialize_clip(clip_config, clip_params, encoding_params, config, i, graphic_data):
     clip_config['graphic_template'] = clip_params.get('clip_graphic_template', {}).get('graphic_template', None)
     clip_config['name'] = config['name']
     clip_config['encoding_params'] = encoding_params
     return Clip(clip_config, config['clips'][i].get('video_url', None), graphic_data)
 
-# Function for commencing creation of graphic overlay(s) for clip(s)
 def process_clips(config, clip_params, encoding_params):
     total_clips = len(config['clips'])
     is_compilation = total_clips > 1
@@ -561,13 +550,10 @@ def process_clips(config, clip_params, encoding_params):
     platform = None
     clips = []
     
-    # Declare graphic template
     graphic_template = clip_params.get('clip_graphic_template', {}).get('graphic_template', None)
     
-    # Retrieve template settings and general settings
     graphic_data, graphic_settings = get_graphic(graphic_template, config)
     
-    # Iterate and generate graphic overlay for (each) clip
     for i, clip_config in enumerate(config['clips']):
         tpc = time.perf_counter()
        
