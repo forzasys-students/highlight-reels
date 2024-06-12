@@ -233,7 +233,24 @@ def modify_graphic(setting, value):
     with open(json_file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
+<<<<<<< Updated upstream
 
+=======
+# Returns x-count clips from specified config_template
+def count_clips(config_json):
+    json_path_file = path_config(config_json)
+
+    with open(json_path_file, 'r') as file:
+        data = json.load(file)
+
+    if 'clips' in data:
+        return len(data['clips'])
+    else:
+        return 0
+
+
+# Edits JSON-file "example_1clip.json" or "example_2clip.json"
+>>>>>>> Stashed changes
 def modify_config(config_file, type, value, index=0):
     clip_meta = ["home_logo_url", "home_name", "home_initials", "visiting_logo_url", "visiting_name", "visiting_initials", "league_logo_url", "league_name", "league_name", "action"]
     json_file_path = path_config(config_file)
@@ -247,22 +264,13 @@ def modify_config(config_file, type, value, index=0):
         data['clips'][index]['clip_meta'][0][type] = value
     elif(type == 'platform' or type == 'aspect_ratio'):
         data['encoding_parameters'][type] = value
+    elif(type == 'video_url'):
+        for i in range(count_clips(config_file)):
+            data['clips'][i][type] = value
     
 
     with open(json_file_path, 'w') as file:
         json.dump(data, file, indent=4)
-
-# Returns x-count clips from specified config_template
-def count_clips(config_json):
-    json_path_file = path_config(config_json)
-
-    with open(json_path_file, 'r') as file:
-        data = json.load(file)
-
-    if 'clips' in data:
-        return len(data['clips'])
-    else:
-        return 0
 
 # Configurates config_template & graphic_template according to user-input
 def user_options():
@@ -289,15 +297,21 @@ def user_options():
     while real_use:
         ptemp = 'platform'
         atemp = 'aspect_ratio'
+        vtemp = 'video_url'
         print("Choose a platform for encoding (default: youtube): \n1. Youtube (16:9)\n2. Tiktok (9:16)\n3. Instagram (1:1)\n4. Facebook (1:1)")
         choice = input("Enter your choice (1/2/3/4): ")
 
         if choice == '1' or choice == 'youtube':
             modify_config(config, ptemp, 'youtube')
             modify_config(config, atemp, [16, 9])
+            modify_config(config, vtemp, 'resources/clips/clip_2_16_9.mp4')
         elif choice == '2' or choice == 'tiktok':
             modify_config(config, ptemp, 'tiktok')
             modify_config(config, atemp, [9, 16])
+<<<<<<< Updated upstream
+=======
+            modify_config(config, vtemp, 'resources/clips/clip_2_9_16.mp4')
+>>>>>>> Stashed changes
         elif choice == '3' or choice == 'instagram':
             modify_config(config, ptemp, 'instagram')
             modify_config(config, atemp, [1, 1])
@@ -555,6 +569,7 @@ def process_clips(config, clip_params, encoding_params):
     graphic_data, graphic_settings = get_graphic(graphic_template, config)
     
     for i, clip_config in enumerate(config['clips']):
+        print(f"Applying graphics for clip #{i+1}")
         tpc = time.perf_counter()
        
         clip = initialize_clip(clip_config, clip_params, encoding_params, config, i, graphic_data)
@@ -627,35 +642,35 @@ def main():
     mp4_filename = None
     success = False
     
-    #try:
-    user_options()
-    config = open_config()
-    encoding_params = config.get('encoding_parameters', {})
-    clip_params = config.get('clip_parameters', {})
-    
-    #log_initial_params(config, encoding_params, clip_params)
-    video_h, video_w, fps, platform, clips, is_comp = process_clips(config, clip_params, encoding_params)
+    try:
+        user_options()
+        config = open_config()
+        encoding_params = config.get('encoding_parameters', {})
+        clip_params = config.get('clip_parameters', {})
+        
+        #log_initial_params(config, encoding_params, clip_params)
+        video_h, video_w, fps, platform, clips, is_comp = process_clips(config, clip_params, encoding_params)
 
-    mp4_filename = process_encode_final(clips, clip_params, is_comp, encoding_params)
-    print(mp4_filename)
-    if verify_file(mp4_filename):
-        success = True
-    else:
-        print('Failed to create valid mp4 file.')
+        mp4_filename = process_encode_final(clips, clip_params, is_comp, encoding_params)
+        
+        if verify_file(mp4_filename):
+            success = True
+        else:
+            print('Failed to create valid mp4 file.')
             
-    #except Exception as e:
-        #print(f'An error has occured: {e}')
-    #finally:
-    global_end_time = time.perf_counter()
-    #log.info(f'[reels] Total time taken for entire process: {global_end_time - global_start_time:.2f} seconds.')
-    print(f'[reels] Total time taken for entire process: {global_end_time - global_start_time:.2f} seconds.')
+    except Exception as e:
+        print(f'An error has occured: {e}')
+    finally:
+        global_end_time = time.perf_counter()
+        #log.info(f'[reels] Total time taken for entire process: {global_end_time - global_start_time:.2f} seconds.')
+        print(f'[reels] Total time taken for entire process: {global_end_time - global_start_time:.2f} seconds.')
 
-    if success:
-        print('Successfully completed entire process')
-    else:
-        print('Failed to compelete entire process')
+        if success:
+            print('Successfully completed entire process')
+        else:
+            print('Failed to compelete entire process')
 
-    clean_up()
+        clean_up()
 
 if __name__ == '__main__':
     main()

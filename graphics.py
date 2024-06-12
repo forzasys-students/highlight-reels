@@ -53,8 +53,6 @@ class GraphicsTemplate:
             return
         
         create_animated_meta(video_h, video_w, self.clip.config['clip_meta'], self.bg_color, self.text_color, home_color, visiting_color, self.clip.local_file_name, clip_num, graphic_template, graphic_layout, self.clip.aspect_ratio)
-        
-        print(f'Adding graphic overlay took: {time.perf_counter() - tpc}')   
 
 def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), text=[], font_scale=1, grow="", opacity=1):
     global font_style, width, height, frame
@@ -66,7 +64,6 @@ def generate_rect(x_offset, y_offset, end_x=1, end_y=1, color=(255, 255, 255), t
         bottom_right = (int(width - top_left[0]), int(height - top_left[1]))
     # If rectangle is offcenter both horiz. and vert.
     elif (end_x != 1 and end_y != 1):
-        
         top_left = int(width * x_offset), int(height * y_offset)
         bottom_right = (int(width * end_x), int(height * end_y))
     # If rectangle is centered only horizontally
@@ -430,7 +427,7 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                 bg_color_black = hex_to_bgr("#343434")
                 bg_color_white = hex_to_bgr("#FFFFFF")
                 text_color_graphic = hex_to_bgr(text_color)
-                text_color_black = hex_to_bgr("#FFFFFF")
+                text_color_white = hex_to_bgr("#FFFFFF")
 
                 # Scoreboard
                 sc_league_center_x = 0.045
@@ -481,8 +478,7 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                 in_team2_score_offset = 0.04
                 in_team2_logo_offset = 0.04
 
-                in_league_name_start = in_league_center_x
-                in_league_name_end = in_league_name_start + 0.04
+                in_league_name_offset = 0.04
 
                 # Very simple and inefficient way to maintain aspect ratio of logos when resizing
                 potrait_logo = ["tokyo", "urawa", "volen", "fortuna"] 
@@ -500,6 +496,21 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                     in_team2_height = int(0.054*height)
                     in_team2_width = int(0.03*width)
 
+                # Action
+                ac_team_center_x = 0.045
+                ac_team_center_y = 0.9
+                ac_team_length = 0.055
+
+                ac_name_y_start = ac_team_center_y
+                ac_name_y_end = ac_team_center_y + ac_team_length
+                ac_name_start = ac_team_center_x
+                ac_name_end = ac_name_start + 0.02
+
+                ac_action_y_start = ac_team_center_y - ac_team_length/2
+                ac_action_y_end = ac_team_center_y
+                ac_action_start = ac_team_center_x
+                ac_action_end = ac_action_start + 0.08
+
                 if graphic_layout == "center":
                     sc_middle_offset = 0.3203125
                     sc_league_center_x += sc_middle_offset
@@ -509,8 +520,141 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                     sc_score_end +=       sc_middle_offset
                     sc_team2_color_end += sc_middle_offset
                     sc_team2_name_end +=  sc_middle_offset
+                    
+                    ac_middle_offset = sc_middle_offset
+                    ac_team_center_x += ac_middle_offset
+                    ac_name_start = ac_team_center_x
+                    ac_name_end = ac_name_start + 0.06
+                    ac_action_start = ac_team_center_x
+                    ac_action_end = ac_action_start + 0.06
+
         elif aspect_ratio == [9, 16]:
-            pass
+            if graphic_template == 'diamond':
+                bg_color_graphic = hex_to_bgr(bg_color)
+                bg_color_black = hex_to_bgr("#343434")
+                bg_color_white = hex_to_bgr("#FFFFFF")
+                text_color_graphic = hex_to_bgr(text_color)
+                text_color_white = hex_to_bgr("#FFFFFF")
+
+                # Scoreboard
+                sc_league_center_x = 0.172
+                sc_league_center_y = 0.095
+                sc_league_length = 0.04
+
+                if "allsvenskan" in league_logo_url:
+                    sc_league_height = int(0.048*height)
+                    sc_league_width = int(0.08*width)
+                elif "j1" in league_logo_url:
+                    sc_league_height = int(0.042*height)
+                    sc_league_width = int(0.067*width)
+                else:
+                    sc_league_height = int(0.044*height)
+                    sc_league_width = int(0.08*width)
+         
+                sc_team1_name_start = sc_league_center_x
+                sc_team1_name_end = 0.355
+                sc_team1_color_end = 0.366
+                sc_score_end = 0.518
+                sc_team2_color_end = 0.529
+                sc_team2_name_end = 0.712
+
+                # Introduction
+                if "allsvenskan" in league_logo_url:
+                    in_league_height = int(0.08*height)
+                    in_league_width = int(0.035*width)
+                elif "j1" in league_logo_url:
+                    in_league_height = int(0.072*height)
+                    in_league_width = int(0.035*width)
+                else:
+                    in_league_height = int(0.082*height)
+                    in_league_width = int(0.046*width)
+
+
+                in_team1_center_x = sc_league_center_x
+                in_team1_center_y = 0.788
+                in_team1_length = sc_league_length
+
+                in_team1_y_start = in_team1_center_y - in_team1_length
+                in_team1_y_end = in_team1_center_y
+                in_team1_name_start = in_team1_center_x
+                in_team1_name_end = in_team1_center_x + 0.04
+                in_team1_color_offset = 0.01
+                in_team1_score_offset = 0.07
+                
+                in_team2_center_x = 0.827
+                in_team2_center_y = 0.869
+                in_team2_length = sc_league_length
+
+                in_team2_y_start = in_team2_center_y
+                in_team2_y_end = in_team2_center_y + sc_league_length
+                in_team2_name_end = in_team2_center_x 
+                in_team2_name_start = in_team2_name_end - 0.04
+                in_team2_color_offset = -0.01
+                in_team2_score_offset = -0.07
+
+                in_league_y_start = 0.808
+                in_league_y_end = in_league_y_start + sc_league_length
+                in_league_name_start = 0.474
+                in_league_name_end = 0.509
+                
+                # Very simple and inefficient way to maintain aspect ratio of logos when resizing
+                if "volen" in home_logo_url:
+                    in_team1_width = int(0.07*width)
+                    in_team1_height = int(0.044*height)
+                elif "psv" in home_logo_url:
+                    in_team1_width = int(0.101*width)
+                    in_team1_height = int(0.047*height)
+                elif "rot" in home_logo_url and "kashima" in home_logo_url:
+                    in_team1_width = int(0.088*width)
+                    in_team1_height = int(0.05*height)
+                else:
+                    in_team1_width = int(0.066*width)
+                    in_team1_height = int(0.0463*height)
+
+                if "volen" in visiting_logo_url:
+                    in_team2_width = int(0.07*width)
+                    in_team2_height = int(0.044*height)
+                elif "psv" in visiting_logo_url:
+                    in_team2_width = int(0.101*width)
+                    in_team2_height = int(0.047*height)
+                elif "rot" in visiting_logo_url or "kashima" in visiting_logo_url:
+                    in_team2_width = int(0.088*width)
+                    in_team2_height = int(0.05*height)
+                else:
+                    in_team2_width = int(0.066*width)
+                    in_team2_height = int(0.0463*height)
+
+                # Action
+                ac_team_center_x = 0.827
+                ac_team_center_y = 0.869
+                ac_team_length = sc_league_length
+
+                ac_name_y_start = ac_team_center_y
+                ac_name_y_end = ac_team_center_y + ac_team_length
+                ac_name_end = ac_team_center_x
+                ac_name_start = ac_name_end - 0.02
+
+                ac_action_y_start = ac_team_center_y - ac_team_length/2
+                ac_action_y_end = ac_team_center_y
+                ac_action_end = ac_team_center_x
+                ac_action_start = ac_action_end + 0.04
+
+                if graphic_layout == "center":
+                    sc_middle_offset = 0.07685185185
+                    sc_league_center_x += sc_middle_offset
+                    sc_team1_name_start = sc_league_center_x
+                    sc_team1_name_end +=  sc_middle_offset
+                    sc_team1_color_end += sc_middle_offset
+                    sc_score_end +=       sc_middle_offset
+                    sc_team2_color_end += sc_middle_offset
+                    sc_team2_name_end +=  sc_middle_offset
+                    
+                    ac_middle_offset = -sc_middle_offset
+                    ac_team_center_x += ac_middle_offset
+                    ac_name_end = ac_team_center_x
+                    ac_name_start = ac_name_end - 0.02
+                    ac_action_end = ac_team_center_x
+                    ac_action_start = ac_action_end - 0.04
         else:
             raise ValueError(f'Invalid aspect ratio entered: {aspect_ratio}.')
         
@@ -534,11 +678,11 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                     generate_rect(sc_team2_score_end, sc_y_end, sc_team2_logo_end, sc_y_time_end, bg_color_black, opacity=0.11) # Time container
 
                     # Visiting team
-                    generate_rect(sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, bg_color_white)
-                    generate_rect(sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, bg_color_graphic)
-                    generate_rect(sc_team2_color_start, sc_y_start, sc_team2_name_end, sc_y_end - (sc_y_end - sc_y_start)/2, visiting_color1)
-                    generate_rect(sc_team2_color_start, sc_y_end - (sc_y_end - sc_y_start)/2, sc_team2_name_end, sc_y_end, visiting_color2)
-                    generate_rect(sc_team2_name_end, sc_y_start, sc_team2_logo_end, sc_y_end, bg_color_graphic)
+                    generate_rect(sc_team2_score_start, sc_y_start, sc_team2_score_end, sc_y_end, bg_color_white) # Score
+                    generate_rect(sc_team2_score_end, sc_y_start, sc_team2_color_start, sc_y_end, bg_color_graphic) # Name
+                    generate_rect(sc_team2_color_start, sc_y_start, sc_team2_name_end, sc_y_end - (sc_y_end - sc_y_start)/2, visiting_color1) # Color1
+                    generate_rect(sc_team2_color_start, sc_y_end - (sc_y_end - sc_y_start)/2, sc_team2_name_end, sc_y_end, visiting_color2) # Color2
+                    generate_rect(sc_team2_name_end, sc_y_start, sc_team2_logo_end, sc_y_end, bg_color_graphic) # Logo
                     
                     # Logo
                     frame = generate_center_logo(league_logo_url, league_width, league_height, sc_team1_score_end, sc_y_start, sc_team2_score_start, sc_y_end) # League
@@ -558,13 +702,13 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                     in_team1_logo_start = (name1_topleft[0]/width)+in_team1_logo_offset
                     in_team1_logo_end = name1_topleft[0]/width
                     generate_rect(in_team1_logo_start, in_y_start, in_team1_logo_end, in_y_end, bg_color_graphic) # Logo
-                    generate_rect(in_team1_name_end, in_y_start, in_team1_color_end, in_y_end - (in_y_end - in_y_start)/2, home_color1) # Color
-                    generate_rect(in_team1_name_end, in_y_end - (in_y_end - in_y_start)/2, in_team1_color_end, in_y_end, home_color2) # Color
+                    generate_rect(in_team1_name_end, in_y_start, in_team1_color_end, in_y_end - (in_y_end - in_y_start)/2, home_color1) # Color1
+                    generate_rect(in_team1_name_end, in_y_end - (in_y_end - in_y_start)/2, in_team1_color_end, in_y_end, home_color2) # Color2
                     
                     generate_rect(in_team1_color_end, in_y_start, in_score_end, in_y_end, bg_color_white) # Score
                     
-                    generate_rect(in_score_end, in_y_start, in_team2_color_end, in_y_end - (in_y_end - in_y_start)/2, visiting_color1) # Color
-                    generate_rect(in_score_end, in_y_end - (in_y_end - in_y_start)/2, in_team2_color_end, in_y_end, visiting_color2) # Color
+                    generate_rect(in_score_end, in_y_start, in_team2_color_end, in_y_end - (in_y_end - in_y_start)/2, visiting_color1) # Color1
+                    generate_rect(in_score_end, in_y_end - (in_y_end - in_y_start)/2, in_team2_color_end, in_y_end, visiting_color2) # Color2
                     name2_topleft, name2_bottomright, rect_height = generate_rect(in_team2_color_end, in_y_start, in_team2_name_end, in_y_end, bg_color_graphic, text=[home_name, visiting_name], grow="right", font_scale=0.5) # Name
                     in_team2_logo_start = name2_bottomright[0]/width
                     in_team2_logo_end = (name2_bottomright[0]/width)+in_team2_logo_offset
@@ -573,34 +717,35 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                     league_topleft, league_bottomright, rect2_height = generate_rect(in_league_start, in_y_end, in_league_end, sc_y_league_end, bg_color_graphic, text=[league_name], font_scale=0.5) # League
                     
                     # Logo
-                    in_team_logo_dim = int((in_team2_logo_end*width - in_team2_logo_start*width)*0.9)
-                    frame = generate_center_logo(home_logo_url, in_team_logo_dim, in_team_logo_dim, in_team1_logo_start, in_y_start, in_team1_logo_end, in_y_end)
-                    frame = generate_center_logo(visiting_logo_url, in_team_logo_dim, in_team_logo_dim, in_team2_logo_start, in_y_start, in_team2_logo_end, in_y_end)
+                    in_team_logo_dim = int((in_team2_logo_end*width - in_team2_logo_start*width)*0.8) # Logo height and width equal 80% container height
+                    frame = generate_center_logo(home_logo_url, in_team_logo_dim, in_team_logo_dim, in_team1_logo_start, in_y_start, in_team1_logo_end, in_y_end) # Home logo
+                    frame = generate_center_logo(visiting_logo_url, in_team_logo_dim, in_team_logo_dim, in_team2_logo_start, in_y_start, in_team2_logo_end, in_y_end) # Visiting logo
 
                     # Text
-                    rect_height = rect_height*0.4
+                    rect_height = rect_height*0.4 # Scale font to container height
                     rect2_height = rect2_height*0.4
-                    generate_center_text(home_name, name1_topleft[0]/width, in_y_start, name1_bottomright[0]/width, in_y_end, rect_h=rect_height, color=text_color)
-                    generate_center_text(visiting_name, name2_topleft[0]/width, in_y_start, name2_bottomright[0]/width, in_y_end, rect_h=rect_height, color=text_color)
-                    generate_center_text(score, in_team1_color_end, in_y_start, in_score_end, in_y_end, color=text_color_black, rect_h=rect_height)
-                    generate_center_text(league_name, league_topleft[0]/width, in_y_end, league_bottomright[0]/width, sc_y_league_end, color=bg_color_white, rect_h=rect2_height,)
+                    generate_center_text(home_name, name1_topleft[0]/width, in_y_start, name1_bottomright[0]/width, in_y_end, rect_h=rect_height, color=text_color) # Home name
+                    generate_center_text(visiting_name, name2_topleft[0]/width, in_y_start, name2_bottomright[0]/width, in_y_end, rect_h=rect_height, color=text_color) # Visiting name
+                    generate_center_text(score, in_team1_color_end, in_y_start, in_score_end, in_y_end, color=text_color_black, rect_h=rect_height) # Score
+                    generate_center_text(league_name, league_topleft[0]/width, in_y_end, league_bottomright[0]/width, sc_y_league_end, color=bg_color_white, rect_h=rect2_height) # League name
 
                 if i > int(duration*0.3) and i < int(duration*0.6):
                     # Action
-                    generate_rect(ac_team_color_start, ac_y_start, ac_team_color_end, ac_y_end - (ac_y_end - ac_y_start)/2, color=home_color1)
-                    generate_rect(ac_team_color_start, ac_y_end - (ac_y_end - ac_y_start)/2, ac_team_color_end, ac_y_end, color=home_color2)
-                    generate_rect(ac_team_color_end, ac_y_start, ac_player_end, ac_y_end, color=bg_color_graphic)
-                    player_topleft, player_bottomright, rect_h = generate_rect(ac_player_end, ac_y_start, ac_name_end, ac_y_end, text=[player_name], color=bg_color_graphic, grow="right", font_scale=0.5)
-                    generate_rect(player_bottomright[0]/width, ac_y_start, player_bottomright[0]/width+ac_action_offset, ac_y_end,color=bg_color_white)
-                    generate_rect(player_topleft[0]/width, ac_y_end, player_bottomright[0]/width, ac_msg_y_end, color=bg_color_graphic, opacity=0.11)
+                    generate_rect(ac_team_color_start, ac_y_start, ac_team_color_end, ac_y_end - (ac_y_end - ac_y_start)/2, color=home_color1) # Jersey color1
+                    generate_rect(ac_team_color_start, ac_y_end - (ac_y_end - ac_y_start)/2, ac_team_color_end, ac_y_end, color=home_color2) # Jersey color2
+                    generate_rect(ac_team_color_end, ac_y_start, ac_player_end, ac_y_end, color=bg_color_graphic) # Player icon container
+                    player_topleft, player_bottomright, rect_h = generate_rect(ac_player_end, ac_y_start, ac_name_end, ac_y_end, text=[player_name], color=bg_color_graphic, grow="right", font_scale=0.5) # Dynamic container of player name
+                    generate_rect(player_bottomright[0]/width, ac_y_start, player_bottomright[0]/width+ac_action_offset, ac_y_end,color=bg_color_white) # Action icon container
+                    generate_rect(player_topleft[0]/width, ac_y_end, player_bottomright[0]/width, ac_msg_y_end, color=bg_color_graphic, opacity=0.11) # Action message container
 
-                    frame = generate_center_logo(player_logo_url, ac_icon_width, ac_icon_height, ac_team_color_end, ac_y_start, ac_player_end, ac_y_end)
-                    frame = generate_center_logo(icon, ac_icon_width, ac_icon_height, player_bottomright[0]/width, ac_y_start, player_bottomright[0]/width+ac_action_offset, ac_y_end)
+                    frame = generate_center_logo(player_logo_url, ac_icon_width, ac_icon_height, ac_team_color_end, ac_y_start, ac_player_end, ac_y_end) # Player icon
+                    frame = generate_center_logo(icon, ac_icon_width, ac_icon_height, player_bottomright[0]/width, ac_y_start, player_bottomright[0]/width+ac_action_offset, ac_y_end) # Action icon
 
-                    generate_center_text(player_name, player_topleft[0]/width, ac_y_start, player_bottomright[0]/width, ac_y_end, color=text_color)
-                    generate_center_text(msg, player_topleft[0]/width, ac_y_end, player_bottomright[0]/width, ac_msg_y_end, color=bg_color_white, font_scale=0.7)
+                    generate_center_text(player_name, player_topleft[0]/width, ac_y_start, player_bottomright[0]/width, ac_y_end, color=text_color) # Player name
+                    generate_center_text(msg, player_topleft[0]/width, ac_y_end, player_bottomright[0]/width, ac_msg_y_end, color=bg_color_white, font_scale=0.7) # Action message
                     
             elif graphic_template == 'diamond':
+                # Scoreboard
                 if i <= (duration):
                     # Generate diamond, return posistion of diamond for placing logo on-top
                     frame, sc_league_topleft, sc_league_bottomright = generate_diamond(sc_league_center_x, sc_league_center_y, sc_league_length, color=bg_color_black)
@@ -626,59 +771,106 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                     frame = generate_center_logo(league_logo_url, sc_league_width, sc_league_height, sc_league_center_x, sc_league_center_y, sc_league_center_x, sc_league_center_y)
                     
                     # Draw text 
-                    generate_center_text(home_ini, sc_team1_name_start, sc_y_start, sc_team1_name_end, sc_y_end, color=bg_color_white)
+                    generate_center_text(home_ini, sc_team1_name_start, sc_y_start, sc_team1_name_end, sc_y_end, color=text_color_white)
                     generate_center_text(score, sc_team1_color_end, sc_y_start, sc_score_end, sc_y_end, color=text_color_graphic)
-                    generate_center_text(visiting_ini, sc_team2_color_end, sc_y_start, sc_team2_name_end, sc_y_end, color=bg_color_white)
+                    generate_center_text(visiting_ini, sc_team2_color_end, sc_y_start, sc_team2_name_end, sc_y_end, color=text_color_white)
 
-                    
+                # Introduction
                 if i > int(duration * 0.025) and i < int(duration * 0.125):
-                    # League diamond container
-                    frame, in_league_topleft, in_league_bottomright = generate_diamond(in_league_center_x, in_league_center_y, in_league_length, color=bg_color_black)
+                    if aspect_ratio == [16, 9]:
+                        # League diamond container
+                        frame, _, in_league_bottomright = generate_diamond(in_league_center_x, in_league_center_y, in_league_length, color=bg_color_black)
 
-                    # Team1 begins from middle to bottom of diamond in y-axis
-                    in_team1_y_start = in_league_center_y
-                    in_team1_y_end = in_league_bottomright[1]/height
+                        # Team1 begins from middle to bottom of diamond in y-axis
+                        in_team1_y_start = in_league_center_y
+                        in_team1_y_end = in_league_bottomright[1]/height
 
-                    # Introduction team1
-                    name1_topleft, name1_bottomright, rect_h = generate_rect(in_team1_name_start, in_team1_y_start, in_team1_name_end, in_team1_y_end, color=bg_color_black, text=[home_name, visiting_name], grow='left', font_scale=0.5)
-                    in_team1_color_end = name1_topleft[0]/width + in_team1_color_offset # Top_left of team's color is offset to top_left of team's name
-                    generate_rect(in_team1_color_end, in_team1_y_start, name1_topleft[0]/width, in_team1_y_end - (in_team1_y_end - in_team1_y_start)/2, color=home_color1)
-                    generate_rect(in_team1_color_end, in_team1_y_end - (in_team1_y_end - in_team1_y_start)/2, name1_topleft[0]/width, in_team1_y_end, color=home_color2)
-                    in_team1_score_end = in_team1_color_end + in_team1_score_offset # Move top_left of team's score according to new position of team1's color
-                    generate_rect(in_team1_score_end, in_team1_y_start, in_team1_color_end, in_team1_y_end, color=bg_color_graphic)
-                    in_team1_logo_end = in_team1_score_end + in_team1_logo_offset # Repeat of above, for logo
-                    generate_rect(in_team1_logo_end, in_team1_y_start, in_team1_score_end, in_team1_y_end, color=bg_color_black)
+                        # Introduction team1
+                        name1_topleft, name1_bottomright, _ = generate_rect(in_team1_name_start, in_team1_y_start, in_team1_name_end, in_team1_y_end, color=bg_color_black, text=[home_name, visiting_name], grow='left', font_scale=0.5)
+                        in_team1_color_end = name1_topleft[0]/width + in_team1_color_offset # Top_left of team's color is offset to top_left of team's name
+                        generate_rect(in_team1_color_end, in_team1_y_start, name1_topleft[0]/width, in_team1_y_end - (in_team1_y_end - in_team1_y_start)/2, color=home_color1)
+                        generate_rect(in_team1_color_end, in_team1_y_end - (in_team1_y_end - in_team1_y_start)/2, name1_topleft[0]/width, in_team1_y_end, color=home_color2)
+                        in_team1_score_end = in_team1_color_end + in_team1_score_offset # Move top_left of team's score according to new position of team1's color
+                        generate_rect(in_team1_score_end, in_team1_y_start, in_team1_color_end, in_team1_y_end, color=bg_color_graphic)
+                        in_team1_logo_end = in_team1_score_end + in_team1_logo_offset # Repeat of above, for logo
+                        generate_rect(in_team1_logo_end, in_team1_y_start, in_team1_score_end, in_team1_y_end, color=bg_color_black)
 
-                    # Team2 begins from top to middle of diamond in y-axis
-                    in_team2_y_start = in_league_center_y - in_league_length
-                    in_team2_y_end = in_league_center_y
+                        # Team2 begins from top to middle of diamond in y-axis
+                        in_team2_y_start = in_league_center_y - in_league_length
+                        in_team2_y_end = in_league_center_y
 
-                    # Introduction team2
-                    name2_topleft, name2_bottomright, rect_h =  generate_rect(in_team2_name_start, in_team2_y_start, in_team2_name_end, in_team2_y_end, color=bg_color_black, text=[home_name, visiting_name], grow='right', font_scale=0.5)
-                    in_team2_color_end = name2_bottomright[0]/width + in_team2_color_offset
-                    generate_rect(name2_bottomright[0]/width, in_team2_y_start, in_team2_color_end, in_team2_y_end - (in_team2_y_end - in_team2_y_start)/2, color=visiting_color1)
-                    generate_rect(name2_bottomright[0]/width, in_team2_y_end - (in_team2_y_end - in_team2_y_start)/2, in_team2_color_end, in_team2_y_end, color=visiting_color2)
-                    in_team2_score_end = in_team2_color_end + in_team2_score_offset
-                    generate_rect(in_team2_color_end, in_team2_y_start, in_team2_score_end, in_team2_y_end, color=bg_color_graphic)
-                    in_team2_logo_end = in_team2_score_end + in_team2_logo_offset
-                    generate_rect(in_team2_score_end, in_team2_y_start, in_team2_logo_end, in_team2_y_end, color=bg_color_black)
-                    
-                    # Introduction league
-                    league_name_topleft, league_name_bottomright, rect_h = generate_rect(in_league_name_start, in_league_center_y + in_league_length/2, in_league_name_end, in_league_bottomright[1]/height, color=bg_color_black, text=[league_name], grow='right', font_scale=0.5)
+                        # Introduction team2
+                        name2_topleft, name2_bottomright, _ =  generate_rect(in_team2_name_start, in_team2_y_start, in_team2_name_end, in_team2_y_end, color=bg_color_black, text=[home_name, visiting_name], grow='right', font_scale=0.5)
+                        in_team2_color_end = name2_bottomright[0]/width + in_team2_color_offset
+                        generate_rect(name2_bottomright[0]/width, in_team2_y_start, in_team2_color_end, in_team2_y_end - (in_team2_y_end - in_team2_y_start)/2, color=visiting_color1)
+                        generate_rect(name2_bottomright[0]/width, in_team2_y_end - (in_team2_y_end - in_team2_y_start)/2, in_team2_color_end, in_team2_y_end, color=visiting_color2)
+                        in_team2_score_end = in_team2_color_end + in_team2_score_offset
+                        generate_rect(in_team2_color_end, in_team2_y_start, in_team2_score_end, in_team2_y_end, color=bg_color_graphic)
+                        in_team2_logo_end = in_team2_score_end + in_team2_logo_offset
+                        generate_rect(in_team2_score_end, in_team2_y_start, in_team2_logo_end, in_team2_y_end, color=bg_color_black)
+                        
+                        # Introduction league
+                        league_name_topleft, league_name_bottomright, _ = generate_rect(in_league_bottomright[0]/width, in_league_center_y + in_league_length/2, in_league_bottomright[0]/width + in_league_name_offset, in_league_bottomright[1]/height, color=bg_color_black, text=[league_name], grow='right', font_scale=0.5)
 
-                    # Draw logos 
-                    frame = generate_center_logo(league_logo_url, in_league_width, in_league_height, in_league_center_x, in_league_center_y, in_league_center_x, in_league_center_y)
-                    frame = generate_center_logo(home_logo_url, in_team1_width, in_team1_height, in_team1_logo_end, in_team1_y_start, in_team1_score_end, in_team1_y_end)
-                    frame = generate_center_logo(visiting_logo_url, in_team2_width, in_team2_height, in_team2_score_end, in_team2_y_start, in_team2_logo_end, in_team2_y_end)
+                        # Draw logos 
+                        frame = generate_center_logo(league_logo_url, in_league_width, in_league_height, in_league_center_x, in_league_center_y, in_league_center_x, in_league_center_y)
+                        frame = generate_center_logo(home_logo_url, in_team1_width, in_team1_height, in_team1_logo_end, in_team1_y_start, in_team1_score_end, in_team1_y_end)
+                        frame = generate_center_logo(visiting_logo_url, in_team2_width, in_team2_height, in_team2_score_end, in_team2_y_start, in_team2_logo_end, in_team2_y_end)
 
-                    # Draw text
-                    generate_center_text(home_name, name1_topleft[0]/width, in_team1_y_start, name1_bottomright[0]/width, in_team1_y_end, color=bg_color_white)
-                    generate_center_text(visiting_name, name2_topleft[0]/width, in_team2_y_start, name2_bottomright[0]/width, in_team2_y_end, color=bg_color_white)
-                    generate_center_text(score[0], in_team1_color_end, in_team1_y_start, in_team1_score_end, in_team1_y_end, color=text_color_graphic)
-                    generate_center_text(score[-1], in_team2_color_end, in_team2_y_start, in_team2_score_end, in_team2_y_end, color=text_color_graphic)
-                    generate_center_text(league_name, league_name_topleft[0]/width, league_name_topleft[1]/height, league_name_bottomright[0]/width, league_name_bottomright[1]/height, color=bg_color_white, font_scale=0.8)
-                    
+                        # Draw text
+                        generate_center_text(home_name, name1_topleft[0]/width, in_team1_y_start, name1_bottomright[0]/width, in_team1_y_end, color=text_color_white, font_scale=1.2)
+                        generate_center_text(visiting_name, name2_topleft[0]/width, in_team2_y_start, name2_bottomright[0]/width, in_team2_y_end, color=text_color_white, font_scale=1.2)
+                        generate_center_text(score[0], in_team1_color_end, in_team1_y_start, in_team1_score_end, in_team1_y_end, color=text_color_graphic, thickness=3)
+                        generate_center_text(score[-1], in_team2_color_end, in_team2_y_start, in_team2_score_end, in_team2_y_end, color=text_color_graphic, thickness=3)
+                        generate_center_text(league_name, league_name_topleft[0]/width, league_name_topleft[1]/height, league_name_bottomright[0]/width, league_name_bottomright[1]/height, color=text_color_white, font_scale=0.8)
+                    elif aspect_ratio == [9, 16]:
+                        frame, _, _ = generate_diamond(in_team1_center_x, in_team1_center_y, in_team1_length, color=bg_color_black)
+                        frame, _, _ = generate_diamond(in_team2_center_x, in_team2_center_y, in_team2_length, color=bg_color_black)
 
+                        name1_topleft, name1_bottomright, _ = generate_rect(in_team1_name_start, in_team1_y_start, in_team1_name_end, in_team1_y_end, color=bg_color_black, text=[home_name, visiting_name], grow='right', font_scale=0.5)
+                        in_team1_color_start = name1_bottomright[0]/width
+                        in_team1_color_end = in_team1_color_start + in_team1_color_offset
+                        generate_rect(in_team1_color_start, in_team1_y_start, in_team1_color_end, in_team1_y_end - (in_team1_y_end - in_team1_y_start)/2, color=home_color1)
+                        generate_rect(in_team1_color_start, in_team1_y_end - (in_team1_y_end - in_team1_y_start)/2, in_team1_color_end, in_team1_y_end, color=home_color2)
+                        generate_rect(in_team1_color_end, in_team1_y_start, in_team1_color_end+in_team1_score_offset, in_team1_y_end, color=bg_color_graphic)
+
+                        league_topleft, league_bottomright, _ = generate_rect(in_league_name_start, in_league_y_start, in_league_name_end, in_league_y_end, color=bg_color_black, text=[league_name], opacity=0.11, font_scale=0.5)
+
+                        name2_topleft, name2_bottomright, _ = generate_rect(in_team2_name_start, in_team2_y_start, in_team2_name_end, in_team2_y_end, color=bg_color_black, text=[home_name,visiting_name], grow='left', font_scale=0.5)
+                        in_team2_color_start = name2_topleft[0]/width + in_team2_color_offset
+                        in_team2_color_end = name2_topleft[0]/width
+                        generate_rect(in_team2_color_start, in_team2_y_start, in_team2_color_end, in_team2_y_end - (in_team2_y_end - in_team2_y_start)/2, color=visiting_color1)
+                        generate_rect(in_team2_color_start, in_team2_y_end - (in_team2_y_end - in_team2_y_start)/2, in_team2_color_end, in_team2_y_end, color=visiting_color2)
+                        generate_rect(in_team2_color_start+in_team2_score_offset, in_team2_y_start, in_team2_color_start, in_team2_y_end, color=bg_color_graphic)
+
+                        frame = generate_center_logo(home_logo_url, in_team1_width, in_team1_height, in_team1_center_x, in_team1_center_y, in_team1_center_x, in_team1_center_y)
+                        frame = generate_center_logo(visiting_logo_url, in_team2_width, in_team2_height, in_team2_center_x, in_team2_center_y, in_team2_center_x, in_team2_center_y)
+
+                        generate_center_text(home_name, name1_topleft[0]/width, in_team1_y_start, name1_bottomright[0]/width, in_team1_y_end, color=text_color_white, font_scale=0.8)
+                        generate_center_text(visiting_name, name2_topleft[0]/width, in_team2_y_start, name2_bottomright[0]/width, in_team2_y_end, color=text_color_white, font_scale=0.8)
+                        generate_center_text(league_name, league_topleft[0]/width, in_league_y_start, league_bottomright[0]/width, in_league_y_end, color=text_color_white, font_scale=0.8)
+                        generate_center_text(score[0], in_team1_color_end, in_team1_y_start, in_team1_color_end+in_team1_score_offset, in_team1_y_end, color=text_color_graphic, font_scale=0.8)
+                        generate_center_text(score[-1], in_team2_color_end+in_team2_score_offset, in_team2_y_start, in_team2_color_end, in_team2_y_end, color=text_color_graphic, font_scale=0.8)
+                # Action
+                if i > int(duration*0.3) and i < int(duration*0.6):
+                    if aspect_ratio == [16, 9]:
+                        action_topleft, action_bottomright, _ = generate_rect(ac_action_start, ac_action_y_start, ac_action_end, ac_action_y_end, color=bg_color_graphic, text=[msg], grow='right', font_scale=0.5)
+                        frame, ac_team_topleft, ac_team_bottomright = generate_diamond(ac_team_center_x, ac_team_center_y, ac_team_length, color=bg_color_black)
+                        player_topleft, player_bottomright, _ = generate_rect(ac_name_start, ac_name_y_start, ac_name_end, ac_name_y_end, color=bg_color_black, text=[player_name], grow='right', font_scale=0.5)
+
+                        frame = generate_center_logo(home_logo_url, in_team1_width, in_team1_height, ac_team_center_x, ac_team_center_y, ac_team_center_x, ac_team_center_y)
+
+                        generate_center_text(player_name, player_topleft[0]/width, player_topleft[1]/height, player_bottomright[0]/width, player_bottomright[1]/height, color=text_color_white)
+                        generate_center_text(msg, action_topleft[0]/width, action_topleft[1]/height, action_bottomright[0]/width, action_bottomright[1]/height, color=text_color_graphic, font_scale=0.7)
+                    elif aspect_ratio == [9, 16]:
+                        action_topleft, action_bottomright, _ = generate_rect(ac_action_start, ac_action_y_start, ac_action_end, ac_action_y_end, color=bg_color_graphic, text=[msg], grow='left')
+                        frame, ac_team_topleft, ac_team_bottomright = generate_diamond(ac_team_center_x, ac_team_center_y, ac_team_length, color=bg_color_black)
+                        player_topleft, player_bottomright, _ = generate_rect(ac_name_start, ac_name_y_start, ac_name_end, ac_name_y_end, color=bg_color_black, text=[player_name], grow='left', font_scale=0.5)
+
+                        frame = generate_center_logo(home_logo_url, in_team1_width, in_team1_height, ac_team_center_x, ac_team_center_y, ac_team_center_x, ac_team_center_y)
+
+                        generate_center_text(player_name, player_topleft[0]/width, ac_name_y_start, player_bottomright[0]/width, ac_name_y_end, color=text_color_white, font_scale=0.7, thickness=2)
+                        generate_center_text(msg, action_topleft[0]/width, ac_action_y_start, action_bottomright[0]/width, ac_action_y_end, color=text_color_graphic, font_scale=0.5, thickness=2, position=0.1)
             # Write the frame
             out.write(frame)
         
