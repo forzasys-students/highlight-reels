@@ -850,7 +850,7 @@ def create_animated_meta(video_h, video_w, clip_meta, bg_color, text_color, home
                         generate_center_text(visiting_name, name2_topleft[0]/width, in_team2_y_start, name2_bottomright[0]/width, in_team2_y_end, color=text_color_white, font_scale=0.8)
                         generate_center_text(league_name, league_topleft[0]/width, in_league_y_start, league_bottomright[0]/width, in_league_y_end, color=text_color_white, font_scale=0.8)
                         generate_center_text(score[0], in_team1_color_end, in_team1_y_start, in_team1_color_end+in_team1_score_offset, in_team1_y_end, color=text_color_graphic, font_scale=0.8)
-                        generate_center_text(score[-1], in_team2_color_end+in_team2_score_offset, in_team2_y_start, in_team2_color_end, in_team2_y_end, color=text_color_graphic, font_scale=0.8)
+                        generate_center_text(score[-1], in_team2_color_end+in_team2_score_offset, in_team2_y_start, in_team2_color_start, in_team2_y_end, color=text_color_graphic, font_scale=0.8)
                 # Action
                 if i > int(duration*0.3) and i < int(duration*0.6):
                     if aspect_ratio == [16, 9]:

@@ -27,23 +27,23 @@
             "video_url": "resources/clips/clip_2_9_16.mp4",
             "clip_meta": [
                 {
-                    "home_logo_url": "team/psv.png",
-                    "home_name": "PSV Eindhoven",
-                    "home_initials": "PSV",
-                    "visiting_logo_url": "team/fortuna.png",
-                    "visiting_name": "Fortuna Sittard",
-                    "visiting_initials": "FOR",
+                    "home_logo_url": "team/volendam.png",
+                    "home_name": "FC Volendam",
+                    "home_initials": "VOL",
+                    "visiting_logo_url": "team/rotterdam.png",
+                    "visiting_name": "Sparta Rotterdam",
+                    "visiting_initials": "SPA",
                     "game_date": "2023-05-13",
                     "game_round": "3",
                     "home_team_goals": "3",
                     "visiting_team_goals": "4",
                     "league_logo_url": "league/eredivisie.png",
                     "league_name": "Eredivisie",
-                    "player_name": "Andr\u00c3\u00a9 Ramalho",
+                    "player_name": "Benaissa Benamar",
                     "action": "yellow card",
-                    "score": "2-1",
-                    "phase": "1st half",
-                    "time": "12:34"
+                    "score": "1-1",
+                    "phase": "2nd half",
+                    "time": "90:40"
                 }
             ]
         }

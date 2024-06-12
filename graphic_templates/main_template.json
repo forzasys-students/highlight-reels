@@ -2,12 +2,12 @@
     "general_settings": {
         "graphic_layout": "left",
         "home_color": [
-            "#ffffff",
-            "#ED1C24"
+            "#ee7f00",
+            "#ffffff"
         ],
         "visiting_color": [
-            "#000000",
-            "#000000"
+            "#466173",
+            "#466173"
         ],
         "template": "diamond"
     },
