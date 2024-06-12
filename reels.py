@@ -233,9 +233,6 @@ def modify_graphic(setting, value):
     with open(json_file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-<<<<<<< Updated upstream
-
-=======
 # Returns x-count clips from specified config_template
 def count_clips(config_json):
     json_path_file = path_config(config_json)
@@ -250,7 +247,6 @@ def count_clips(config_json):
 
 
 # Edits JSON-file "example_1clip.json" or "example_2clip.json"
->>>>>>> Stashed changes
 def modify_config(config_file, type, value, index=0):
     clip_meta = ["home_logo_url", "home_name", "home_initials", "visiting_logo_url", "visiting_name", "visiting_initials", "league_logo_url", "league_name", "league_name", "action"]
     json_file_path = path_config(config_file)
@@ -308,10 +304,7 @@ def user_options():
         elif choice == '2' or choice == 'tiktok':
             modify_config(config, ptemp, 'tiktok')
             modify_config(config, atemp, [9, 16])
-<<<<<<< Updated upstream
-=======
             modify_config(config, vtemp, 'resources/clips/clip_2_9_16.mp4')
->>>>>>> Stashed changes
         elif choice == '3' or choice == 'instagram':
             modify_config(config, ptemp, 'instagram')
             modify_config(config, atemp, [1, 1])

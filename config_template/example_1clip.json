@@ -4,10 +4,10 @@
         "height": 1920,
         "width": 1080,
         "aspect_ratio": [
-            16,
-            9
+            9,
+            16
         ],
-        "platform": "youtube",
+        "platform": "tiktok",
         "container": "mp4",
         "video_bitrate": 1000000,
         "audio_tracks": 0
@@ -24,7 +24,7 @@
     },
     "clips": [
         {
-            "video_url": "resources/clips/clip_1_16_9.mp4",
+            "video_url": "resources/clips/clip_2_9_16.mp4",
             "clip_meta": [
                 {
                     "home_logo_url": "team/psv.png",
